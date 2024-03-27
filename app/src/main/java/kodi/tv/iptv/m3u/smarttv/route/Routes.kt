@@ -1,7 +1,12 @@
-package com.securevpn.zoovpn.globalvpn.route
+package kodi.tv.iptv.m3u.smarttv.route
 
 object Routes {
+    var onBoard = "onBoard"
+    var mainScreen = "mains"
     var home = "home"
-    var server = "server"
-    var premium = "premium"
+    var m3u = "m3u"
+    var channel = "channel"
+    var saveChannel = "saveChannel"
+    var player1 = "player1"
+
 }

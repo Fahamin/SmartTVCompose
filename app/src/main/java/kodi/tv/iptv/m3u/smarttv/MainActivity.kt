@@ -1,6 +1,7 @@
 package kodi.tv.iptv.m3u.smarttv
 
 import android.os.Bundle
+import android.window.SplashScreen
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,14 +13,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import kodi.tv.iptv.m3u.smarttv.route.Routes
 import kodi.tv.iptv.m3u.smarttv.ui.theme.SmartTVComposeTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-       // WindowCompat.setDecorFitsSystemWindows(window, false)
+        // WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
             SmartTVComposeTheme {
@@ -29,7 +33,20 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    NavigateScreen(this,navController)
+                    val navController = rememberNavController()
+
+                    NavHost(navController = navController, startDestination = Routes.onBoard) {
+
+                        composable(Routes.onBoard) {
+                            OnboardingScreen(
+                                navController = navController,
+                                context = this@MainActivity
+                            )
+                        }
+                        composable(Routes.mainScreen) {
+                            MainScreen()
+                        }
+                    }
                 }
             }
         }

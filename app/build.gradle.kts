@@ -70,6 +70,16 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
 
+    implementation ("androidx.compose.material:material:1.6.4")
+
+    // Lifecycle
+    val lifecycle_version = "2.7.0"
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycle_version")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:$lifecycle_version")
+
+    //coil rememberimage
+    implementation ("io.coil-kt:coil-compose:1.3.2")
     //lottie
     implementation( "com.airbnb.android:lottie-compose:5.2.0")
     //navigation
