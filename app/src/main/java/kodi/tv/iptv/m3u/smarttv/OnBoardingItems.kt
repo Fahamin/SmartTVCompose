@@ -12,8 +12,7 @@ class OnBoardingItems(
                     R.drawable.in1,
                     R.string.onBoardingTitle1,
                     R.string.onBoardingText1
-                ),
-                OnBoardingItems(
+                ),                OnBoardingItems(
                     R.drawable.in2,
                     R.string.onBoardingTitle2,
                     R.string.onBoardingText2

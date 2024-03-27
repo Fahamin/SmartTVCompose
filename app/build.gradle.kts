@@ -70,8 +70,13 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
 
-    implementation ("com.google.accompanist:accompanist-pager-indicators:0.30.1")
-
+    //lottie
+    implementation( "com.airbnb.android:lottie-compose:5.2.0")
+    //navigation
+    implementation("androidx.navigation:navigation-compose:2.7.7")
+    //pager
+    implementation ("androidx.compose.foundation:foundation:1.6.4")
+    //firebase
     implementation (platform("com.google.firebase:firebase-bom:32.8.0"))
     implementation("com.google.firebase:firebase-analytics")
     implementation ("com.google.firebase:firebase-database-ktx")

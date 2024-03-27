@@ -1,11 +1,13 @@
 package kodi.tv.iptv.m3u.smarttv
 
+import android.content.Context
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,24 +21,30 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerScope
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.KeyboardArrowLeft
 import androidx.compose.material.icons.outlined.KeyboardArrowRight
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,190 +57,184 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
+import com.securevpn.zoovpn.globalvpn.route.Routes
 import kotlinx.coroutines.launch
 
+
 @OptIn(ExperimentalFoundationApi::class)
-@Preview
 @Composable
-fun OnBoarding() {
-    val items = OnBoardingItems.getData()
-    val scope = rememberCoroutineScope()
-    val pageState = rememberPagerState {
-        0
-    }
-
-    Column(modifier = Modifier.fillMaxSize()) {
-        TopSection(
-            onBackClick = {
-                if (pageState.currentPage + 1 > 1) scope.launch {
-                    pageState.scrollToPage(pageState.currentPage - 1)
-                }
-            },
-            onSkipClick = {
-                if (pageState.currentPage + 1 < items.size) scope.launch {
-                    pageState.scrollToPage(items.size - 1)
-                }
-            }
-        )
-
-        HorizontalPager(
-            modifier = Modifier
-                .fillMaxHeight(0.9f)
-                .fillMaxWidth(),
-            state = pageState,
-            pageSpacing = 0.dp,
-            userScrollEnabled = true,
-            reverseLayout = false,
-            contentPadding = PaddingValues(0.dp),
-            beyondBoundsPageCount = 0,
-            pageSize = PageSize.Fill,
-            key = null,
-            pageNestedScrollConnection = PagerDefaults.pageNestedScrollConnection(
-                Orientation.Horizontal
-            ),
-        )
-        { page ->
-            OnBoardingItem(items = items[page])
-        }
-
-
-
-
-        BottomSection(size = items.size, index = pageState.currentPage) {
-            if (pageState.currentPage + 1 < items.size) scope.launch {
-                pageState.scrollToPage(pageState.currentPage + 1)
-            }
-        }
-    }
-}
-
-
-@Composable
-fun TopSection(onBackClick: () -> Unit = {}, onSkipClick: () -> Unit = {}) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(12.dp)
-    ) {
-        // Back button
-        IconButton(onClick = onBackClick, modifier = Modifier.align(Alignment.CenterStart)) {
-            Icon(imageVector = Icons.Outlined.KeyboardArrowLeft, contentDescription = null)
-        }
-
-        // Skip Button
-        TextButton(
-            onClick = onSkipClick,
-            modifier = Modifier.align(Alignment.CenterEnd),
-            contentPadding = PaddingValues(0.dp)
-        ) {
-            Text(text = "Skip", color = MaterialTheme.colorScheme.onBackground)
-        }
-    }
-}
-
-@Composable
-fun BottomSection(size: Int, index: Int, onButtonClick: () -> Unit = {}) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(12.dp)
-    ) {
-        // Indicators
-        Indicators(size, index)
-
-        // FAB Next
-        /* FloatingActionButton(
-             onClick = onButtonClick,
-            // backgroundColor = MaterialTheme.colorScheme.primary,
-            // contentColor = MaterialTheme.colorScheme.onPrimary,
-             modifier = Modifier.align(Alignment.CenterEnd)
-         ) {
-             Icon(imageVector = Icons.Outlined.KeyboardArrowRight, contentDescription = "Next")
-         }*/
-
-        FloatingActionButton(
-            onClick = { /* do something */ },
-            containerColor = Color.Black,
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .clip(RoundedCornerShape(15.dp, 15.dp, 15.dp, 15.dp))
-        ) {
-            Icon(
-                Icons.Outlined.KeyboardArrowRight,
-                tint = Color.White,
-                contentDescription = "Localized description"
-            )
-        }
-    }
-}
-
-@Composable
-fun BoxScope.Indicators(size: Int, index: Int) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.align(Alignment.CenterStart)
-    ) {
-        repeat(size) {
-            Indicator(isSelected = it == index)
-        }
-    }
-}
-
-@Composable
-fun Indicator(isSelected: Boolean) {
-    val width = animateDpAsState(
-        targetValue = if (isSelected) 25.dp else 10.dp,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
+fun OnboardingScreen(navController: NavHostController, context: Context) {
+    val animations = listOf(
+        R.raw.intro1,
+        R.raw.intro,
+        R.raw.intro3
+    )
+    val titles = listOf(
+        "Explore the Skies",
+        "Seaside Escapes",
+        "Garden Getaways"
     )
 
-    Box(
-        modifier = Modifier
-            .height(10.dp)
-            .width(width.value)
-            .clip(CircleShape)
-            .background(
-                color = if (isSelected) MaterialTheme.colorScheme.primary else Color(0XFFF8E2E7)
-            )
+    val descriptions = listOf(
+        "Discover unbeatable deals on air travel to destinations around the globe.",
+        "Embark on unforgettable journeys to renowned beachfront destinations.",
+        "Experience the finest city and garden tours right at your fingertips with our app."
+    )
+    val pagerState = rememberPagerState(pageCount = {
+        3
+    })
+
+    Column(
+        Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
+        HorizontalPager(
+            state = pagerState,
+            Modifier.wrapContentSize()
+        ) { currentPage ->
+            Column(
+                Modifier
+                    .wrapContentSize()
+                    .padding(26.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(animations[currentPage]))
+                LottieAnimation(
+                    composition = composition,
+                    iterations = LottieConstants.IterateForever,
+                    modifier = Modifier.size(300.dp)
+                )
+                Text(
+                    text = titles[currentPage],
+                    textAlign = TextAlign.Center,
+                    fontSize = 40.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = descriptions[currentPage],
+                    Modifier.padding(top = 45.dp),
+                    textAlign = TextAlign.Center,
+                    fontSize = 20.sp
+
+                )
+            }
+        }
+
+        PageIndicator(
+            pageCount = animations.size,
+            currentPage = pagerState.currentPage,
+            modifier = Modifier.padding(60.dp)
+        )
+    }
+
+    ButtonsSection(
+        pagerState = pagerState,
+        navController = navController,
+        context = context
+    )
+
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun ButtonsSection(pagerState: PagerState, navController: NavHostController, context: Context) {
+
+    val scope = rememberCoroutineScope()
+
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .padding(30.dp)){
+        if (pagerState.currentPage != 2){
+            Text(text = "Next",
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .clickable {
+                        scope.launch {
+                            val nextPage = pagerState.currentPage +1
+                            pagerState.scrollToPage(nextPage)
+                        }
+                    },
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
+            Text(text = "Back",
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .clickable {
+                        scope.launch {
+                            val prevPage = pagerState.currentPage -1
+                            if (prevPage >= 0){
+                                pagerState.scrollToPage(prevPage)
+                            }
+                        }
+                    },
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
+        }else{
+            OutlinedButton(onClick = {
+
+                onBoardingIsFinished(context = context)
+                navController.popBackStack()
+                navController.navigate(Routes.premium)
+            },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+                , colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0x25E92F1E)
+                )
+            ) {
+                Text(
+                    text = "Get Started",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+            }
+        }
     }
 }
 
 @Composable
-fun OnBoardingItem(items: OnBoardingItems) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxSize()
+fun PageIndicator(pageCount: Int, currentPage: Int, modifier: Modifier) {
+
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = modifier
     ) {
-        Image(
-            painter = painterResource(id = items.image),
-            contentDescription = "Image1",
-            modifier = Modifier.padding(start = 50.dp, end = 50.dp)
-        )
-
-        Spacer(modifier = Modifier.height(25.dp))
-
-        Text(
-            text = stringResource(id = items.title),
-            style = MaterialTheme.typography.headlineMedium,
-            // fontSize = 24.sp,
-            color = MaterialTheme.colorScheme.onBackground,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-            letterSpacing = 1.sp,
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = stringResource(id = items.desc),
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onBackground,
-            fontWeight = FontWeight.Light,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(10.dp),
-            letterSpacing = 1.sp,
-        )
+        repeat(pageCount){
+            IndicatorSingleDot(isSelected = it == currentPage )
+        }
     }
+}
+
+@Composable
+fun IndicatorSingleDot(isSelected: Boolean) {
+
+    val width = animateDpAsState(targetValue = if (isSelected) 35.dp else 15.dp, label = "")
+    Box(modifier = Modifier
+        .padding(2.dp)
+        .height(15.dp)
+        .width(width.value)
+        .clip(CircleShape)
+        .background(if (isSelected) Color(0xFFE92F1E) else Color(0x25E92F1E))
+    )
+}
+
+private fun onBoardingIsFinished(context: Context) {
+    val sharedPreferences = context.getSharedPreferences("onBoarding", Context.MODE_PRIVATE)
+    val editor = sharedPreferences.edit()
+    editor.putBoolean("isFinished", true)
+    editor.apply()
+
 }
