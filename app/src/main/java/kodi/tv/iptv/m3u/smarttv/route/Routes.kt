@@ -8,5 +8,10 @@ object Routes {
     var channel = "channel"
     var saveChannel = "saveChannel"
     var player1 = "player1"
+    var playlist = "playlist"
+
+    var bottom = "bottom"
+    var play = "play"
+
 
 }

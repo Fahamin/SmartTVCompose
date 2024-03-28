@@ -58,7 +58,7 @@ fun MainScreen() {
     ) {
         BottomNavigateScreen(
             context = context,
-            navHostController
+            navController
             = navController
         )
     }

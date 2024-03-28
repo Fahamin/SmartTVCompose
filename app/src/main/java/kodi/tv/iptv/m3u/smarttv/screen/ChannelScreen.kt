@@ -17,16 +17,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import kodi.tv.iptv.m3u.smarttv.botom.BottomBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChannelScreen() {
+fun ChannelScreen(navController: NavHostController) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        "Home", maxLines = 1, color = Color.Blue, overflow = TextOverflow.Ellipsis
+                        "ChannelScreen", maxLines = 1, color = Color.Blue, overflow = TextOverflow.Ellipsis
                     )
                 },
             )
@@ -41,7 +43,7 @@ fun ChannelScreen() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(text = "HomeScreen", fontSize = 22.sp)
+                Text(text = "ChannelScreen", fontSize = 22.sp)
             }
         }
     }

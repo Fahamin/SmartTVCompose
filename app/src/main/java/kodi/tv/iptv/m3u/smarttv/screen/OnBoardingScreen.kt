@@ -1,4 +1,4 @@
-package kodi.tv.iptv.m3u.smarttv
+package kodi.tv.iptv.m3u.smarttv.screen
 
 import android.content.Context
 import androidx.compose.animation.core.animateDpAsState
@@ -39,6 +39,7 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
+import kodi.tv.iptv.m3u.smarttv.R
 import kodi.tv.iptv.m3u.smarttv.route.Routes
 import kotlinx.coroutines.launch
 

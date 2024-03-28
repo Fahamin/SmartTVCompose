@@ -17,6 +17,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kodi.tv.iptv.m3u.smarttv.route.Routes
+import kodi.tv.iptv.m3u.smarttv.screen.OnboardingScreen
 import kodi.tv.iptv.m3u.smarttv.ui.theme.SmartTVComposeTheme
 
 class MainActivity : ComponentActivity() {
