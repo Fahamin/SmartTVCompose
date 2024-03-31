@@ -3,9 +3,11 @@ package kodi.tv.iptv.m3u.smarttv
 import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.Navigation
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import kodi.tv.iptv.m3u.smarttv.route.Routes
 import kodi.tv.iptv.m3u.smarttv.screen.ChannelScreen
@@ -47,10 +49,26 @@ fun BottomNavigateScreen(context: Context, navController: NavHostController) {
         navigation(
             startDestination = Routes.playlist,
             route = Routes.play
-        ){
-            composable(route = Routes.playlist)
+        ) {
+            composable(route = Routes.playlist,
+                arguments = listOf(
+                    navArgument("name") {
+                        type = NavType.StringType
+                    },
+                    navArgument("link") {
+                        type = NavType.StringType
+                    }
+                ))
             {
-                PlaylistScreen(navController)
+
+                val name = it.arguments?.getString("name") ?: ""
+                val link = it.arguments?.getString("link") ?: ""
+
+                PlaylistScreen(navController,name,link)
+            }
+            composable(route = Routes.player1)
+            {
+               // PlaylistScreen(navController)
             }
         }
     }
