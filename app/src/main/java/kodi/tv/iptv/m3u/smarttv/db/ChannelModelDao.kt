@@ -9,7 +9,6 @@ import kodi.tv.iptv.m3u.smarttv.model.ChannelModel
 @Dao
 interface ChannelModelDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-
     fun insertChannel(channelModel: ChannelModel)
 
     @Query("select * from ChannelTable")

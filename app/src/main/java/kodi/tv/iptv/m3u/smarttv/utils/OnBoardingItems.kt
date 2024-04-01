@@ -1,4 +1,6 @@
-package kodi.tv.iptv.m3u.smarttv
+package kodi.tv.iptv.m3u.smarttv.utils
+
+import kodi.tv.iptv.m3u.smarttv.R
 
 class OnBoardingItems(
     val image: Int,

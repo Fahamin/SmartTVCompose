@@ -12,8 +12,6 @@ import kodi.tv.iptv.m3u.smarttv.model.ChannelModel;
 public abstract class KodiDatabase extends RoomDatabase {
     public static KodiDatabase instance;
 
-    public abstract BuildDao buildDao();
-
     public abstract ChannelFavDao channelFavDao();
 
     public abstract ChannelModelDao channelModelDao();

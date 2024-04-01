@@ -9,10 +9,10 @@ import kodi.tv.iptv.m3u.koditv.model.Player_FavModel
 @Dao
 interface ChannelFavDao {
     @Insert
-    fun addData(playerFavModel: Player_FavModel)
+    fun insertFav(playerFavModel: Player_FavModel)
 
     @Query("SELECT * FROM PLAYER_FAVMODEL")
-    fun favoriteData(): List<Player_FavModel>
+    fun getAllFavorite(): MutableList<Player_FavModel>
 
     @Query("SELECT EXISTS (SELECT 1 FROM Player_FavModel WHERE id_chaine=:id_chaine)")
     fun isFavorite(id_chaine: Int): Int

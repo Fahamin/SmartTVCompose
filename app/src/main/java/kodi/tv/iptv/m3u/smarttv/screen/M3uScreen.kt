@@ -3,7 +3,6 @@ package kodi.tv.iptv.m3u.smarttv.screen
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.view.View
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,6 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import com.google.firebase.database.DataSnapshot
@@ -46,17 +46,16 @@ import kodi.tv.iptv.m3u.smarttv.model.ChannelModel
 import kodi.tv.iptv.m3u.smarttv.model.M3uModel
 import kodi.tv.iptv.m3u.smarttv.route.Routes
 import kodi.tv.iptv.m3u.smarttv.utils.M3UParserurl
-import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.withContext
-import java.util.concurrent.ExecutorService
+import kodi.tv.iptv.m3u.smarttv.viewModelApp.DbViewModel
 import java.util.concurrent.Executors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun M3uScreen(navController: NavHostController) {
+    val viewModel = hiltViewModel<DbViewModel>()
+
     var itemList by remember { mutableStateOf(emptyList<M3uModel>()) }
-    val handler: Handler? = null
-    val executor: ExecutorService? = null
+
     LaunchedEffect(Unit) {
 
         var list: MutableList<M3uModel> = ArrayList()
@@ -120,30 +119,34 @@ fun M3uScreen(navController: NavHostController) {
                             Log.e("fahamin", itemList[i].name.toString())
                             Log.e("fahamin", itemList[i].link.toString())
 
-                            val bundle = bundleOf(
-                                "name" to itemList[i].name,
-                                "link" to itemList[i].name,
-                            )
+                            var isAdd = viewModel.checkPlayList(itemList[i].name.toString())
+                            if (isAdd) {
 
-                            val executor = Executors.newSingleThreadExecutor()
-                            val handler = Handler(Looper.getMainLooper())
+                            } else {
+                                val executor = Executors.newSingleThreadExecutor()
+                                val handler = Handler(Looper.getMainLooper())
 
 
-                            executor.execute(Runnable {
-                                val parse: List<ChannelModel> =
-                                    M3UParserurl().parse(itemList[i].link)
-                                Log.e("fahamin", parse.toString())
+                                executor.execute(Runnable {
+                                    val parse: List<ChannelModel> =
+                                        M3UParserurl().parse(itemList[i].link)
+                                    Log.e("fahamin", parse.toString())
 
-                                handler.post(Runnable {
-
-                                    navController.navigate(Routes.play) {
-                                        launchSingleTop
-                                        popUpTo(navController.graph.findStartDestination().id) {
-                                            inclusive = true
-                                        }
+                                    for (i in parse) {
+                                        viewModel.insertChannel(i)
                                     }
+                                    handler.post(Runnable {
+
+                                        navController.navigate(Routes.play) {
+                                            launchSingleTop
+                                            popUpTo(navController.graph.findStartDestination().id) {
+                                                inclusive = true
+                                            }
+                                        }
+                                    })
                                 })
-                            })
+                            }
+
                         }
                     }
                 }

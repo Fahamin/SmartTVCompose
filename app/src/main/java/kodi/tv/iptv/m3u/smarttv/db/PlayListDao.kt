@@ -10,8 +10,7 @@ import kodi.tv.iptv.m3u.koditv.model.PlayListModel
 @Dao
 interface PlayListDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-
-    fun addData(playListModel: PlayListModel)
+    fun insertPlaylist(playListModel: PlayListModel)
 
     @Query("select * from PlayListTable")
     fun getAllPlayList(): MutableList<PlayListModel>

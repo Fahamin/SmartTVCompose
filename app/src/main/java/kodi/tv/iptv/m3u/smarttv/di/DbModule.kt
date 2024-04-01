@@ -18,18 +18,25 @@ class DbModule {
     @Singleton
     fun provideDB(@ApplicationContext context: Context) = Room.databaseBuilder(
         context, KodiDatabase::class.java, "kst232"
-    )
-        .allowMainThreadQueries()
+    ).allowMainThreadQueries()
         .fallbackToDestructiveMigration()
         .build()
 
     @Provides
     @Singleton
-    fun provideDao(db: KodiDatabase) = db.channelModelDao()
+    fun provideChannelDao(db: KodiDatabase) = db.channelModelDao()
 
-/*
     @Provides
-    fun provideEntity() = NoteModel()
-*/
+    @Singleton
+    fun providePlayListDao(db: KodiDatabase) = db.playlistDao()
+
+    @Provides
+    @Singleton
+    fun providefavChannelDao(db: KodiDatabase) = db.channelFavDao()
+
+    /*
+        @Provides
+        fun provideEntity() = NoteModel()
+    */
 
 }
