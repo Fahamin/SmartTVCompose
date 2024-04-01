@@ -2,7 +2,7 @@ package kodi.tv.iptv.m3u.smarttv.viewModelApp
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kodi.tv.iptv.m3u.koditv.model.PlayListModel
+import kodi.tv.iptv.m3u.smarttv.model.PlayListModel
 import kodi.tv.iptv.m3u.koditv.model.Player_FavModel
 import kodi.tv.iptv.m3u.smarttv.model.ChannelModel
 import kodi.tv.iptv.m3u.smarttv.repository.DbRepository

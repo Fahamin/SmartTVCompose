@@ -5,7 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import kodi.tv.iptv.m3u.koditv.model.PlayListModel
+import kodi.tv.iptv.m3u.smarttv.model.PlayListModel
 
 @Dao
 interface PlayListDao {

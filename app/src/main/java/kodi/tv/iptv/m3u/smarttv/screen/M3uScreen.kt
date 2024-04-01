@@ -34,7 +34,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.core.os.bundleOf
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -42,6 +41,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import kodi.tv.iptv.m3u.smarttv.model.PlayListModel
 import kodi.tv.iptv.m3u.smarttv.model.ChannelModel
 import kodi.tv.iptv.m3u.smarttv.model.M3uModel
 import kodi.tv.iptv.m3u.smarttv.route.Routes
@@ -119,10 +119,12 @@ fun M3uScreen(navController: NavHostController) {
                             Log.e("fahamin", itemList[i].name.toString())
                             Log.e("fahamin", itemList[i].link.toString())
 
-                            var isAdd = viewModel.checkPlayList(itemList[i].name.toString())
+                            var isAdd = viewModel.checkPlayList(itemList[i].link.toString())
                             if (isAdd) {
 
                             } else {
+
+
                                 val executor = Executors.newSingleThreadExecutor()
                                 val handler = Handler(Looper.getMainLooper())
 
@@ -131,6 +133,12 @@ fun M3uScreen(navController: NavHostController) {
                                     val parse: List<ChannelModel> =
                                         M3UParserurl().parse(itemList[i].link)
                                     Log.e("fahamin", parse.toString())
+
+                                    val model = PlayListModel()
+                                    model.idPlayList = itemList[i].link.toString()
+                                    model.namePlayList = itemList[i].name.toString()
+                                    model.totalChannel =parse.size
+                                    viewModel.insertPlaylist(model)
 
                                     for (i in parse) {
                                         viewModel.insertChannel(i)

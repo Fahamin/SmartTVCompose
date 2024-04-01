@@ -1,6 +1,6 @@
 package kodi.tv.iptv.m3u.smarttv.repository
 
-import kodi.tv.iptv.m3u.koditv.model.PlayListModel
+import kodi.tv.iptv.m3u.smarttv.model.PlayListModel
 import kodi.tv.iptv.m3u.koditv.model.Player_FavModel
 import kodi.tv.iptv.m3u.smarttv.db.ChannelFavDao
 import kodi.tv.iptv.m3u.smarttv.db.ChannelModelDao

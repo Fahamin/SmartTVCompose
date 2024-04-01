@@ -3,7 +3,7 @@ package kodi.tv.iptv.m3u.smarttv.db
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import kodi.tv.iptv.m3u.koditv.model.FavModel
-import kodi.tv.iptv.m3u.koditv.model.PlayListModel
+import kodi.tv.iptv.m3u.smarttv.model.PlayListModel
 import kodi.tv.iptv.m3u.koditv.model.Player_FavModel
 import kodi.tv.iptv.m3u.smarttv.model.ChannelModel
 

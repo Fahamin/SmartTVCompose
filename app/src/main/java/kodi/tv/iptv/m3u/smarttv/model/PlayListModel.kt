@@ -1,4 +1,4 @@
-package kodi.tv.iptv.m3u.koditv.model
+package kodi.tv.iptv.m3u.smarttv.model
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
