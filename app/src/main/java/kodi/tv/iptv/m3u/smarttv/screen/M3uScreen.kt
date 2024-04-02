@@ -46,7 +46,7 @@ import kodi.tv.iptv.m3u.smarttv.model.ChannelModel
 import kodi.tv.iptv.m3u.smarttv.model.M3uModel
 import kodi.tv.iptv.m3u.smarttv.route.Routes
 import kodi.tv.iptv.m3u.smarttv.utils.M3UParserurl
-import kodi.tv.iptv.m3u.smarttv.viewModelApp.DbViewModel
+import kodi.tv.iptv.m3u.smarttv.viewModel.DbViewModel
 import java.util.concurrent.Executors
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -121,7 +121,12 @@ fun M3uScreen(navController: NavHostController) {
 
                             var isAdd = viewModel.checkPlayList(itemList[i].link.toString())
                             if (isAdd) {
-
+                                navController.navigate(Routes.play) {
+                                    launchSingleTop
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        inclusive = true
+                                    }
+                                }
                             } else {
 
 
@@ -137,7 +142,7 @@ fun M3uScreen(navController: NavHostController) {
                                     val model = PlayListModel()
                                     model.idPlayList = itemList[i].link.toString()
                                     model.namePlayList = itemList[i].name.toString()
-                                    model.totalChannel =parse.size
+                                    model.totalChannel = parse.size
                                     viewModel.insertPlaylist(model)
 
                                     for (i in parse) {

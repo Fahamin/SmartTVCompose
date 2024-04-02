@@ -1,4 +1,4 @@
-package kodi.tv.iptv.m3u.smarttv.viewModelApp
+package kodi.tv.iptv.m3u.smarttv.viewModel
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel

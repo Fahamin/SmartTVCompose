@@ -7,7 +7,7 @@ object Routes {
     var m3u = "m3u"
     var channel = "channel"
     var saveChannel = "saveChannel"
-    var player1 = "player1"
+    var player1 = "player1/{link}"
     var playlist = "playlist"
 
     var bottom = "bottom"

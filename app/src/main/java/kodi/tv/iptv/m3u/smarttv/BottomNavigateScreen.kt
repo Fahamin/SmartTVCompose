@@ -13,6 +13,7 @@ import kodi.tv.iptv.m3u.smarttv.route.Routes
 import kodi.tv.iptv.m3u.smarttv.screen.ChannelScreen
 import kodi.tv.iptv.m3u.smarttv.screen.HomeScreen
 import kodi.tv.iptv.m3u.smarttv.screen.M3uScreen
+import kodi.tv.iptv.m3u.smarttv.screen.PlayerScreen
 import kodi.tv.iptv.m3u.smarttv.screen.PlaylistScreen
 import kodi.tv.iptv.m3u.smarttv.screen.SaveChannelScreen
 import org.checkerframework.checker.units.qual.s
@@ -64,11 +65,19 @@ fun BottomNavigateScreen(context: Context, navController: NavHostController) {
                 val name = it.arguments?.getString("name") ?: ""
                 val link = it.arguments?.getString("link") ?: ""
 
-                PlaylistScreen(navController,name,link)
+                PlaylistScreen(navController, name, link)
             }
-            composable(route = Routes.player1)
+
+            composable(
+                route = "${Routes.player1}/{pid}",
+                arguments = listOf(
+                    navArgument("pid") {
+                        type = NavType.StringType
+                    })
+            )
             {
-               // PlaylistScreen(navController)
+                val link = it.arguments?.getString("pid") ?: ""
+                PlayerScreen(link = link)
             }
         }
     }

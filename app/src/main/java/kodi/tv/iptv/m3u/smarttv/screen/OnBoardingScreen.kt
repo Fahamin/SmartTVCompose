@@ -47,6 +47,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun OnboardingScreen(navController: NavHostController, context: Context) {
+    val scope = rememberCoroutineScope()
     val animations = listOf(
         R.raw.intro1,
         R.raw.intro,
@@ -83,6 +84,21 @@ fun OnboardingScreen(navController: NavHostController, context: Context) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
+                Text(
+                    text = "Skip",
+                    modifier = Modifier
+                        .align(Alignment.End)
+                        .clickable {
+                            scope.launch {
+                                onBoardingIsFinished(context = context)
+                                navController.popBackStack()
+                                navController.navigate(Routes.mainScreen)
+                            }
+                        },
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
                 val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(animations[currentPage]))
                 LottieAnimation(
                     composition = composition,
@@ -126,16 +142,19 @@ fun ButtonsSection(pagerState: PagerState, navController: NavHostController, con
 
     val scope = rememberCoroutineScope()
 
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .padding(30.dp)){
-        if (pagerState.currentPage != 2){
-            Text(text = "Next",
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(30.dp)
+    ) {
+        if (pagerState.currentPage != 2) {
+            Text(
+                text = "Next",
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .clickable {
                         scope.launch {
-                            val nextPage = pagerState.currentPage +1
+                            val nextPage = pagerState.currentPage + 1
                             pagerState.scrollToPage(nextPage)
                         }
                     },
@@ -143,13 +162,14 @@ fun ButtonsSection(pagerState: PagerState, navController: NavHostController, con
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
             )
-            Text(text = "Back",
+            Text(
+                text = "Back",
                 modifier = Modifier
                     .align(Alignment.BottomStart)
                     .clickable {
                         scope.launch {
-                            val prevPage = pagerState.currentPage -1
-                            if (prevPage >= 0){
+                            val prevPage = pagerState.currentPage - 1
+                            if (prevPage >= 0) {
                                 pagerState.scrollToPage(prevPage)
                             }
                         }
@@ -158,17 +178,17 @@ fun ButtonsSection(pagerState: PagerState, navController: NavHostController, con
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
             )
-        }else{
-            OutlinedButton(onClick = {
+        } else {
+            OutlinedButton(
+                onClick = {
 
-                onBoardingIsFinished(context = context)
-                navController.popBackStack()
-                navController.navigate(Routes.mainScreen)
-            },
+                    onBoardingIsFinished(context = context)
+                    navController.popBackStack()
+                    navController.navigate(Routes.mainScreen)
+                },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .align(Alignment.BottomCenter)
-                , colors = ButtonDefaults.buttonColors(
+                    .align(Alignment.BottomCenter), colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0x25E92F1E)
                 )
             ) {
@@ -190,8 +210,8 @@ fun PageIndicator(pageCount: Int, currentPage: Int, modifier: Modifier) {
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = modifier
     ) {
-        repeat(pageCount){
-            IndicatorSingleDot(isSelected = it == currentPage )
+        repeat(pageCount) {
+            IndicatorSingleDot(isSelected = it == currentPage)
         }
     }
 }
@@ -200,12 +220,13 @@ fun PageIndicator(pageCount: Int, currentPage: Int, modifier: Modifier) {
 fun IndicatorSingleDot(isSelected: Boolean) {
 
     val width = animateDpAsState(targetValue = if (isSelected) 35.dp else 15.dp, label = "")
-    Box(modifier = Modifier
-        .padding(2.dp)
-        .height(15.dp)
-        .width(width.value)
-        .clip(CircleShape)
-        .background(if (isSelected) Color(0xFFE92F1E) else Color(0x25E92F1E))
+    Box(
+        modifier = Modifier
+            .padding(2.dp)
+            .height(15.dp)
+            .width(width.value)
+            .clip(CircleShape)
+            .background(if (isSelected) Color(0xFFE92F1E) else Color(0x25E92F1E))
     )
 }
 
