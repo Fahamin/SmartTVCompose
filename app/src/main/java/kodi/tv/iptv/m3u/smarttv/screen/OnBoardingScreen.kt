@@ -92,7 +92,7 @@ fun OnboardingScreen(navController: NavHostController, context: Context) {
                             scope.launch {
                                 onBoardingIsFinished(context = context)
                                 navController.popBackStack()
-                                navController.navigate(Routes.mainScreen)
+                                navController.navigate(Routes.bottom)
                             }
                         },
                     fontSize = 22.sp,
@@ -184,7 +184,7 @@ fun ButtonsSection(pagerState: PagerState, navController: NavHostController, con
 
                     onBoardingIsFinished(context = context)
                     navController.popBackStack()
-                    navController.navigate(Routes.mainScreen)
+                    navController.navigate(Routes.bottom)
                 },
                 modifier = Modifier
                     .fillMaxWidth()

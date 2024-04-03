@@ -83,14 +83,7 @@ fun PlaylistScreen(navController: NavHostController, name: String, link: String)
                         ) { i ->
                             selectedIndex = i
 
-                            navController.navigate(
-                                "${Routes.player1}/${playlist[i].idPlayList}}"
-                            ) {
-                                launchSingleTop
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    inclusive = true
-                                }
-                            }
+
                         }
                     }
                 }

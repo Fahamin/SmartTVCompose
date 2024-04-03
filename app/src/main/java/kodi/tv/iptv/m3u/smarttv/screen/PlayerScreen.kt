@@ -23,10 +23,12 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.ui.PlayerView
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 
 @OptIn(UnstableApi::class)
 @Composable
-fun PlayerScreen(link: String) {
+fun PlayerScreen(navController: NavHostController, link: String?) {
 
     Log.e("fahamin", link.toString())
     var lifecycle by remember {
@@ -35,7 +37,7 @@ fun PlayerScreen(link: String) {
     val context = LocalContext.current
 
     val mediaItem = MediaItem.fromUri(
-        "https://file-examples.com/storage/fe793dd9be65a9b389251ea/2017/04/file_example_MP4_480_1_5MG.mp4"
+        link.toString()
     )
 
 //      progressive video:

@@ -31,20 +31,10 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+
                     val navController = rememberNavController()
-
-                    NavHost(navController = navController, startDestination = Routes.onBoard) {
-
-                        composable(Routes.onBoard) {
-                            OnboardingScreen(
-                                navController = navController,
-                                context = this@MainActivity
-                            )
-                        }
-                        composable(Routes.mainScreen) {
-                            MainScreen()
-                        }
-                    }
+                    val context = this@MainActivity
+                    NavGraphApp(navController,context)
                 }
             }
         }

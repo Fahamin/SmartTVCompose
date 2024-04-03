@@ -109,7 +109,46 @@ fun M3uScreen(navController: NavHostController) {
             if (itemList.isEmpty()) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             } else {
-                LazyColumn {
+
+
+                val executor = Executors.newSingleThreadExecutor()
+                val handler = Handler(Looper.getMainLooper())
+
+                executor.execute(Runnable {
+
+                    for (i in 0..itemList.size-1)
+                    {
+                        var isAdd = viewModel.checkPlayList(itemList[i].link.toString())
+                        if (isAdd) {
+
+                        }else{
+                            val parse: List<ChannelModel> =
+                                M3UParserurl().parse(itemList[i].link)
+                            Log.e("fahamin", parse.toString())
+
+                            val model = PlayListModel()
+                            model.idPlayList = itemList[i].link.toString()
+                            model.namePlayList = itemList[i].name.toString()
+                            model.totalChannel = parse.size
+                            viewModel.insertPlaylist(model)
+
+                            for (i in parse) {
+                                viewModel.insertChannel(i)
+                            }
+                        }
+
+                        handler.post(Runnable {
+
+
+                        })
+                    }
+
+
+
+                })
+
+
+              /*  LazyColumn {
                     itemsIndexed(items = itemList) { index, item ->
                         ListItemView(
                             m3uModel = item, index, selectedIndex
@@ -130,39 +169,11 @@ fun M3uScreen(navController: NavHostController) {
                             } else {
 
 
-                                val executor = Executors.newSingleThreadExecutor()
-                                val handler = Handler(Looper.getMainLooper())
-
-
-                                executor.execute(Runnable {
-                                    val parse: List<ChannelModel> =
-                                        M3UParserurl().parse(itemList[i].link)
-                                    Log.e("fahamin", parse.toString())
-
-                                    val model = PlayListModel()
-                                    model.idPlayList = itemList[i].link.toString()
-                                    model.namePlayList = itemList[i].name.toString()
-                                    model.totalChannel = parse.size
-                                    viewModel.insertPlaylist(model)
-
-                                    for (i in parse) {
-                                        viewModel.insertChannel(i)
-                                    }
-                                    handler.post(Runnable {
-
-                                        navController.navigate(Routes.play) {
-                                            launchSingleTop
-                                            popUpTo(navController.graph.findStartDestination().id) {
-                                                inclusive = true
-                                            }
-                                        }
-                                    })
-                                })
                             }
 
                         }
                     }
-                }
+                }*/
 
             }
 
