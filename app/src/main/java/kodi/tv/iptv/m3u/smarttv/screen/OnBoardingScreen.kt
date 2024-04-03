@@ -24,6 +24,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -48,6 +49,15 @@ import kotlinx.coroutines.launch
 @Composable
 fun OnboardingScreen(navController: NavHostController, context: Context) {
     val scope = rememberCoroutineScope()
+    LaunchedEffect(Unit)
+    {
+        val sharedPreferences = context.getSharedPreferences("onBoarding", Context.MODE_PRIVATE)
+        if (sharedPreferences.getBoolean("isFinished", false)) {
+            navController.popBackStack()
+            navController.navigate(Routes.bottom)
+        }
+    }
+
     val animations = listOf(
         R.raw.intro1,
         R.raw.intro,

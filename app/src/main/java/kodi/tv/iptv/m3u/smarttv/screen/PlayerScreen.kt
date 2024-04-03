@@ -2,6 +2,7 @@ package kodi.tv.iptv.m3u.smarttv.screen
 
 import android.util.Log
 import androidx.annotation.OptIn
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
@@ -18,12 +19,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.source.MediaSource
-import androidx.media3.exoplayer.source.ProgressiveMediaSource
+import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.ui.PlayerView
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 
 @OptIn(UnstableApi::class)
@@ -36,22 +36,14 @@ fun PlayerScreen(navController: NavHostController, link: String?) {
     }
     val context = LocalContext.current
 
-    val mediaItem = MediaItem.fromUri(
-        link.toString()
-    )
 
-//      progressive video:
-    val mediaSource: MediaSource =
-        ProgressiveMediaSource.Factory(DefaultHttpDataSource.Factory()).createMediaSource(mediaItem)
-
-//        non progressive video:
-//        val mediaSource: MediaSource =
-//            HlsMediaSource.Factory(DefaultHttpDataSource.Factory())
-//                .createMediaSource(mediaItem)
+    val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
+    val hlsMediaSource =
+        HlsMediaSource.Factory(dataSourceFactory).createMediaSource(MediaItem.fromUri(link.toString()))
 
     val exoPlayer = remember {
         ExoPlayer.Builder(context).build().apply {
-            setMediaSource(mediaSource)
+            setMediaSource(hlsMediaSource)
             prepare()
             playWhenReady = true
         }
@@ -70,25 +62,30 @@ fun PlayerScreen(navController: NavHostController, link: String?) {
         }
     }
 
-    AndroidView(modifier = Modifier
-        .fillMaxWidth()
-        .aspectRatio(16f / 9f), factory = {
-        PlayerView(context).also { playerView ->
-            playerView.player = exoPlayer
-        }
-    }, update = {
-        when (lifecycle) {
-            Lifecycle.Event.ON_RESUME -> {
-                it.onPause()
-                it.player?.pause()
+    Column {
+        AndroidView(modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(16f / 9f), factory = {
+            PlayerView(context).also { playerView ->
+                playerView.player = exoPlayer
             }
+        }, update = {
+            when (lifecycle) {
+                Lifecycle.Event.ON_RESUME -> {
+                    it.onPause()
+                    it.player?.pause()
+                }
 
-            Lifecycle.Event.ON_PAUSE -> {
-                it.onResume()
+                Lifecycle.Event.ON_PAUSE -> {
+                    it.onResume()
+                }
+
+                else -> Unit
             }
+        })
 
-            else -> Unit
-        }
-    })
+
+    }
+
 
 }
