@@ -9,18 +9,14 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -87,6 +83,17 @@ fun VideoPlayer(navController: NavHostController, link: String?) {
 
     var playbackState by remember { mutableStateOf(exoPlayer.playbackState) }
 
+    var isFullScreen by remember { mutableStateOf(false) }
+
+    var playerModifier = if (isFullScreen) {
+        Modifier.fillMaxSize()
+    } else {
+        Modifier
+            .fillMaxWidth()
+            .aspectRatio(16f / 9f)
+    }
+
+
     Box(modifier = Modifier) {
         DisposableEffect(key1 = Unit) {
             val listener =
@@ -114,7 +121,7 @@ fun VideoPlayer(navController: NavHostController, link: String?) {
 
         AndroidView(
             modifier =
-            Modifier.clickable {
+            playerModifier.clickable {
                 shouldShowControls = shouldShowControls.not()
             },
             factory = {
@@ -122,30 +129,13 @@ fun VideoPlayer(navController: NavHostController, link: String?) {
                 PlayerView(context).also { playerView ->
                     playerView.player = exoPlayer
                     playerView.useController = false
-                }
+                    playerView.keepScreenOn = true
 
-            }
-        )
 
-        /*AndroidView(
-            modifier =
-            Modifier.clickable {
-                shouldShowControls = shouldShowControls.not()
-            },
-            factory = {
-
-                StyledPlayerView(context).apply {
-                    player = exoPlayer
-                    useController = false
-                    layoutParams =
-                        FrameLayout.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.MATCH_PARENT
-                        )
                 }
             }
         )
-*/
+
         PlayerControls(
             isVisible = { shouldShowControls },
             isPlaying = { isPlaying },
@@ -210,28 +200,11 @@ private fun PlayerControls(
         exit = fadeOut()
     ) {
         Box(modifier = Modifier.background(Color.Black.copy(alpha = 0.6f))) {
-            TopControl(
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .fillMaxWidth(),
-                title = title
-            )
-
-            CenterControls(
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .fillMaxWidth(),
-                isPlaying = isPlaying,
-                onReplayClick = onReplayClick,
-                onForwardClick = onForwardClick,
-                onPauseToggle = onPauseToggle,
-                playbackState = playbackState
-            )
 
             BottomControls(
                 modifier =
                 Modifier
-                    .align(Alignment.BottomCenter)
+                    .align(Alignment.TopCenter)
                     .fillMaxWidth()
                     .animateEnterExit(
                         enter =
@@ -268,61 +241,6 @@ private fun TopControl(modifier: Modifier = Modifier, title: () -> String) {
     )
 }
 
-@Composable
-private fun CenterControls(
-    modifier: Modifier = Modifier,
-    isPlaying: () -> Boolean,
-    playbackState: () -> Int,
-    onReplayClick: () -> Unit,
-    onPauseToggle: () -> Unit,
-    onForwardClick: () -> Unit
-) {
-    val isVideoPlaying = remember(isPlaying()) { isPlaying() }
-
-    val playerState = remember(playbackState()) { playbackState() }
-
-    Row(modifier = modifier, horizontalArrangement = Arrangement.SpaceEvenly) {
-        IconButton(modifier = Modifier.size(40.dp), onClick = onReplayClick) {
-            Image(
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop,
-                painter = painterResource(id = R.drawable.ic_replay_5),
-                contentDescription = "Replay 5 seconds"
-            )
-        }
-
-        IconButton(modifier = Modifier.size(40.dp), onClick = onPauseToggle) {
-            Image(
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop,
-                painter =
-                when {
-                    isVideoPlaying -> {
-                        painterResource(id = R.drawable.baseline_pause_24)
-                    }
-
-                    isVideoPlaying.not() && playerState == STATE_ENDED -> {
-                        painterResource(id = R.drawable.ic_replay)
-                    }
-
-                    else -> {
-                        painterResource(id = R.drawable.ic_play)
-                    }
-                },
-                contentDescription = "Play/Pause"
-            )
-        }
-
-        IconButton(modifier = Modifier.size(40.dp), onClick = onForwardClick) {
-            Image(
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop,
-                painter = painterResource(id = R.drawable.ic_forward_10),
-                contentDescription = "Forward 10 seconds"
-            )
-        }
-    }
-}
 
 @Composable
 private fun BottomControls(
@@ -339,55 +257,20 @@ private fun BottomControls(
 
     val buffer = remember(bufferedPercentage()) { bufferedPercentage() }
 
-    Column(modifier = modifier.padding(bottom = 32.dp)) {
-        Box(modifier = Modifier.fillMaxWidth()) {
-            Slider(
-                value = buffer.toFloat(),
-                enabled = false,
-                onValueChange = { /*do nothing*/ },
-                valueRange = 0f..100f,
-                colors =
-                SliderDefaults.colors(
-                    disabledThumbColor = Color.Transparent,
-                    disabledActiveTrackColor = Color.Gray
-                )
-            )
-
-            Slider(
-                modifier = Modifier.fillMaxWidth(),
-                value = videoTime.toFloat(),
-                onValueChange = onSeekChanged,
-                valueRange = 0f..duration.toFloat(),
-                colors =
-                SliderDefaults.colors(
-                    thumbColor = Color.Red,
-                    activeTickColor = Color.Green
-                )
-            )
-        }
-
-        Row(
+    Column(modifier = modifier.padding(bottom = 132.dp)) {
+        IconButton(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                text = duration.formatMinSec(),
-                color = Color.Green
-            )
-
-            IconButton(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                onClick = {}
-            ) {
-                Image(
-                    contentScale = ContentScale.Crop,
-                    painter = painterResource(id = R.drawable.baseline_fullscreen_24),
-                    contentDescription = "Enter/Exit fullscreen"
-                )
+                .padding(horizontal = 16.dp)
+                .align(Alignment.End),
+            onClick = {
+              //  isFullScreen = !isFullScreen
             }
+        ) {
+            Image(
+                contentScale = ContentScale.Crop,
+                painter = painterResource(id = R.drawable.baseline_fullscreen_24),
+                contentDescription = "Enter/Exit fullscreen"
+            )
         }
     }
 }
