@@ -1,6 +1,8 @@
 package kodi.tv.iptv.m3u.smarttv
 
-import android.content.Context
+import android.os.Build
+import androidx.activity.ComponentActivity
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -10,11 +12,12 @@ import androidx.navigation.navArgument
 import kodi.tv.iptv.m3u.smarttv.route.Routes
 import kodi.tv.iptv.m3u.smarttv.screen.MainScreen
 import kodi.tv.iptv.m3u.smarttv.screen.OnboardingScreen
-import kodi.tv.iptv.m3u.smarttv.screen.PlayerScreen
 import kodi.tv.iptv.m3u.smarttv.screen.PlaylistScreen
+import kodi.tv.iptv.m3u.smarttv.screen.VideoPlayer
 
+@RequiresApi(Build.VERSION_CODES.R)
 @Composable
-fun NavGraphApp(navController: NavHostController, context: Context) {
+fun NavGraphApp(navController: NavHostController, context: ComponentActivity) {
     NavHost(
         navController = navController,
         startDestination = Routes.onBoard,
@@ -40,8 +43,8 @@ fun NavGraphApp(navController: NavHostController, context: Context) {
                 }
             )
         ){ backstackEntry ->
-            PlayerScreen(navController,
-                link = backstackEntry.arguments?.getString("name")
+            VideoPlayer(navController,
+                link = backstackEntry.arguments?.getString("name"),context
             )
         }
 

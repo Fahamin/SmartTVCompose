@@ -1,9 +1,16 @@
 package kodi.tv.iptv.m3u.smarttv.screen
 
+import android.content.pm.ActivityInfo
+import android.os.Build
 import android.util.Log
+import android.view.View
 import android.view.ViewGroup
+import android.view.WindowInsetsController
+import android.view.WindowManager
 import android.widget.FrameLayout
+import androidx.activity.ComponentActivity
 import androidx.annotation.OptIn
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,9 +39,14 @@ import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.ui.PlayerView
 import androidx.navigation.NavHostController
 
+@RequiresApi(Build.VERSION_CODES.R)
 @OptIn(UnstableApi::class)
 @Composable
-fun PlayerScreen(navController: NavHostController, link: String?) {
+fun PlayerScreen(
+    navController: NavHostController,
+    link: String?,
+    activitycompose: ComponentActivity
+) {
 
     Log.e("fahamin", link.toString())
 
@@ -56,6 +68,7 @@ fun PlayerScreen(navController: NavHostController, link: String?) {
         }
     }
 
+
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(key1 = lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -71,7 +84,9 @@ fun PlayerScreen(navController: NavHostController, link: String?) {
 
     Column {
         val playerModifier = if (isFullScreen) {
-            Modifier.fillMaxSize()
+            Modifier
+                .fillMaxSize()
+                .aspectRatio(1f)
         } else {
             Modifier
                 .fillMaxWidth()
@@ -85,10 +100,15 @@ fun PlayerScreen(navController: NavHostController, link: String?) {
                     playerView.player = exoPlayer
                     playerView.useController = false
                     playerView.keepScreenOn = true
-                    playerView.layoutParams = FrameLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT
-                    )
+                    playerView.setFullscreenButtonClickListener {
+                        if (isFullScreen)
+                             playerView.layoutParams = FrameLayout.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT
+                            )
+
+                    }
+
                 }
             },
             update = {
@@ -115,4 +135,29 @@ fun PlayerScreen(navController: NavHostController, link: String?) {
             Text(if (isFullScreen) "Exit Full Screen" else "Full Screen")
         }
     }
+}
+
+@OptIn(UnstableApi::class)
+@RequiresApi(Build.VERSION_CODES.R)
+@Composable
+fun HandleFullScreen(activity: ComponentActivity, exoPlayer: ExoPlayer) {
+    val controller = activity.window.insetsController
+    if (controller != null) {
+        controller.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        controller.hide(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE)
+    } else {
+        activity.window.decorView.systemUiVisibility = (
+                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                        or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        or View.SYSTEM_UI_FLAG_FULLSCREEN
+                )
+    }
+
+    activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+    activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+    exoPlayer.playWhenReady = true
+    exoPlayer.playbackState
 }

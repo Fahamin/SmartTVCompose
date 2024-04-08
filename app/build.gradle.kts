@@ -102,7 +102,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("com.google.code.gson:gson:2.10.1")
 
-
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.32.0")
     // Dependency Injection
     implementation("com.google.dagger:hilt-android:2.49")
     kapt("com.google.dagger:hilt-android-compiler:2.49")
@@ -114,6 +114,7 @@ dependencies {
     implementation ("com.google.android.exoplayer:exoplayer:2.19.1")
     implementation ("com.google.android.exoplayer:exoplayer-hls:2.19.1")
 
+    implementation ("com.github.fengdai.compose:media:0.4.0")
     implementation ("androidx.media3:media3-exoplayer:1.3.0")
     implementation ("androidx.media3:media3-ui:1.3.0")
     implementation("androidx.media3:media3-exoplayer-hls:1.3.0")

@@ -1,5 +1,8 @@
 package kodi.tv.iptv.m3u.smarttv.screen
 
+import android.app.Activity
+import android.content.pm.ActivityInfo
+import androidx.activity.ComponentActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
@@ -29,9 +32,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.Player.STATE_ENDED
@@ -47,7 +54,7 @@ import java.util.concurrent.TimeUnit
 
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
-fun VideoPlayer(navController: NavHostController, link: String?) {
+fun VideoPlayer(navController: NavHostController, link: String?, activity: ComponentActivity) {
 
     val context = LocalContext.current
     val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
@@ -169,7 +176,8 @@ fun VideoPlayer(navController: NavHostController, link: String?) {
             bufferedPercentage = { bufferedPercentage },
             onSeekChanged = { timeMs: Float ->
                 exoPlayer.seekTo(timeMs.toLong())
-            }
+            },
+            activity = activity
         )
     }
 }
@@ -188,7 +196,8 @@ private fun PlayerControls(
     currentTime: () -> Long,
     bufferedPercentage: () -> Int,
     playbackState: () -> Int,
-    onSeekChanged: (timeMs: Float) -> Unit
+    onSeekChanged: (timeMs: Float) -> Unit,
+    activity: ComponentActivity
 ) {
 
     val visible = remember(isVisible()) { isVisible() }
@@ -223,7 +232,7 @@ private fun PlayerControls(
                 totalDuration = totalDuration,
                 currentTime = currentTime,
                 bufferedPercentage = bufferedPercentage,
-                onSeekChanged = onSeekChanged
+                onSeekChanged = onSeekChanged, activity
             )
         }
     }
@@ -248,14 +257,31 @@ private fun BottomControls(
     totalDuration: () -> Long,
     currentTime: () -> Long,
     bufferedPercentage: () -> Int,
-    onSeekChanged: (timeMs: Float) -> Unit
+    onSeekChanged: (timeMs: Float) -> Unit,
+    activity: ComponentActivity
 ) {
 
     val duration = remember(totalDuration()) { totalDuration() }
 
     val videoTime = remember(currentTime()) { currentTime() }
+    val view = LocalView.current
 
     val buffer = remember(bufferedPercentage()) { bufferedPercentage() }
+    val context = LocalContext.current
+    val currentOrientation =
+        remember { mutableStateOf(context.resources.configuration.orientation) }
+
+    var showSystemUi by remember { mutableStateOf(false) }
+    val window = (view.context as Activity).window
+    val insetsController = WindowCompat.getInsetsController(window, view)
+    if (!view.isInEditMode) {
+        if (!showSystemUi) {
+            insetsController.apply {
+                hide(WindowInsetsCompat.Type.systemBars())
+                systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            }
+        } else { insetsController.apply { show(WindowInsetsCompat.Type.systemBars()) } }
+    }
 
     Column(modifier = modifier.padding(bottom = 132.dp)) {
         IconButton(
@@ -263,7 +289,19 @@ private fun BottomControls(
                 .padding(horizontal = 16.dp)
                 .align(Alignment.End),
             onClick = {
-              //  isFullScreen = !isFullScreen
+                if (currentOrientation.value == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
+                    activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                    currentOrientation.value = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                    showSystemUi = true
+
+                } else {
+                    activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                    currentOrientation.value = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                    showSystemUi = false
+
+
+                }
+
             }
         ) {
             Image(
@@ -274,6 +312,7 @@ private fun BottomControls(
         }
     }
 }
+
 
 fun Long.formatMinSec(): String {
     return if (this == 0L) {
