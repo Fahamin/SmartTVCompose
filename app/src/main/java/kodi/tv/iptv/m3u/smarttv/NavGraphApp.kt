@@ -34,17 +34,25 @@ fun NavGraphApp(navController: NavHostController, context: ComponentActivity) {
         }
 
         composable(
-            route = "${Routes.player1}?name={name}",
+            route = "${Routes.player1}?name={name}?cat={cat}",
             arguments = listOf(
-                navArgument(name = "name"){
+                navArgument(name = "name") {
+                    type = NavType.StringType
+                    //defaultValue= "user"
+                    nullable = true
+                },
+                navArgument(name = "cat") {
                     type = NavType.StringType
                     //defaultValue= "user"
                     nullable = true
                 }
             )
-        ){ backstackEntry ->
-            VideoPlayer(navController,
-                link = backstackEntry.arguments?.getString("name"),context
+        ) { backstackEntry ->
+            VideoPlayer(
+                navController,
+                link = backstackEntry.arguments?.getString("name"),
+                cat = backstackEntry.arguments?.getString("cat"),
+                context
             )
         }
 

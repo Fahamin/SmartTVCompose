@@ -2,25 +2,25 @@ package kodi.tv.iptv.m3u.smarttv.screen
 
 import android.app.Activity
 import android.content.pm.ActivityInfo
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -41,7 +41,6 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
-import androidx.media3.common.Player.STATE_ENDED
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultHttpDataSource
@@ -50,12 +49,16 @@ import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.ui.PlayerView
 import androidx.navigation.NavHostController
 import kodi.tv.iptv.m3u.smarttv.R
-import java.util.concurrent.TimeUnit
 
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
-fun VideoPlayer(navController: NavHostController, link: String?, activity: ComponentActivity) {
-
+fun VideoPlayer(
+    navController: NavHostController,
+    link: String?,
+    cat: String?,
+    activity: ComponentActivity
+) {
+    Log.e("fahamin", cat!!)
     val context = LocalContext.current
     val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
     val hlsMediaSource =
@@ -100,86 +103,93 @@ fun VideoPlayer(navController: NavHostController, link: String?, activity: Compo
             .aspectRatio(16f / 9f)
     }
 
+    Column {
+        Box(modifier = Modifier) {
+            DisposableEffect(key1 = Unit) {
+                val listener =
+                    object : Player.Listener {
+                        override fun onEvents(
+                            player: Player,
+                            events: Player.Events
+                        ) {
+                            super.onEvents(player, events)
+                            totalDuration = player.duration.coerceAtLeast(0L)
+                            currentTime = player.currentPosition.coerceAtLeast(0L)
+                            bufferedPercentage = player.bufferedPercentage
+                            isPlaying = player.isPlaying
+                            playbackState = player.playbackState
+                        }
+                    }
 
-    Box(modifier = Modifier) {
-        DisposableEffect(key1 = Unit) {
-            val listener =
-                object : Player.Listener {
-                    override fun onEvents(
-                        player: Player,
-                        events: Player.Events
-                    ) {
-                        super.onEvents(player, events)
-                        totalDuration = player.duration.coerceAtLeast(0L)
-                        currentTime = player.currentPosition.coerceAtLeast(0L)
-                        bufferedPercentage = player.bufferedPercentage
-                        isPlaying = player.isPlaying
-                        playbackState = player.playbackState
+                exoPlayer.addListener(listener)
+
+                onDispose {
+                    exoPlayer.removeListener(listener)
+                    exoPlayer.release()
+                }
+            }
+
+            AndroidView(
+                modifier =
+                playerModifier.clickable {
+                    shouldShowControls = shouldShowControls.not()
+                },
+                factory = {
+
+                    PlayerView(context).also { playerView ->
+                        playerView.player = exoPlayer
+                        playerView.useController = false
+                        playerView.keepScreenOn = true
+
+
                     }
                 }
+            )
 
-            exoPlayer.addListener(listener)
 
-            onDispose {
-                exoPlayer.removeListener(listener)
-                exoPlayer.release()
-            }
+            PlayerControls(
+                isVisible = { shouldShowControls },
+                isPlaying = { isPlaying },
+                title = { exoPlayer.mediaMetadata.displayTitle.toString() },
+                playbackState = { playbackState },
+                onReplayClick = { exoPlayer.seekBack() },
+                onForwardClick = { exoPlayer.seekForward() },
+                onPauseToggle = {
+                    when {
+                        exoPlayer.isPlaying -> {
+                            // pause the video
+                            exoPlayer.pause()
+                        }
+
+                        exoPlayer.isPlaying.not() &&
+                                playbackState == Player.STATE_ENDED -> {
+                            exoPlayer.seekTo(0)
+                            exoPlayer.playWhenReady = true
+                        }
+
+                        else -> {
+                            // play the video
+                            // it's already paused
+                            exoPlayer.play()
+                        }
+                    }
+                    isPlaying = isPlaying.not()
+                },
+                totalDuration = { totalDuration },
+                currentTime = { currentTime },
+                bufferedPercentage = { bufferedPercentage },
+                onSeekChanged = { timeMs: Float ->
+                    exoPlayer.seekTo(timeMs.toLong())
+                },
+                activity = activity
+            )
         }
+        Spacer(modifier = Modifier.height(10.dp))
+        Row {
 
-        AndroidView(
-            modifier =
-            playerModifier.clickable {
-                shouldShowControls = shouldShowControls.not()
-            },
-            factory = {
-
-                PlayerView(context).also { playerView ->
-                    playerView.player = exoPlayer
-                    playerView.useController = false
-                    playerView.keepScreenOn = true
-
-
-                }
-            }
-        )
-
-        PlayerControls(
-            isVisible = { shouldShowControls },
-            isPlaying = { isPlaying },
-            title = { exoPlayer.mediaMetadata.displayTitle.toString() },
-            playbackState = { playbackState },
-            onReplayClick = { exoPlayer.seekBack() },
-            onForwardClick = { exoPlayer.seekForward() },
-            onPauseToggle = {
-                when {
-                    exoPlayer.isPlaying -> {
-                        // pause the video
-                        exoPlayer.pause()
-                    }
-
-                    exoPlayer.isPlaying.not() &&
-                            playbackState == STATE_ENDED -> {
-                        exoPlayer.seekTo(0)
-                        exoPlayer.playWhenReady = true
-                    }
-
-                    else -> {
-                        // play the video
-                        // it's already paused
-                        exoPlayer.play()
-                    }
-                }
-                isPlaying = isPlaying.not()
-            },
-            totalDuration = { totalDuration },
-            currentTime = { currentTime },
-            bufferedPercentage = { bufferedPercentage },
-            onSeekChanged = { timeMs: Float ->
-                exoPlayer.seekTo(timeMs.toLong())
-            },
-            activity = activity
-        )
+        }
     }
+
 }
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -208,124 +218,69 @@ private fun PlayerControls(
         enter = fadeIn(),
         exit = fadeOut()
     ) {
-        Box(modifier = Modifier.background(Color.Black.copy(alpha = 0.6f))) {
 
-            BottomControls(
-                modifier =
-                Modifier
-                    .align(Alignment.TopCenter)
-                    .fillMaxWidth()
-                    .animateEnterExit(
-                        enter =
-                        slideInVertically(
-                            initialOffsetY = { fullHeight: Int ->
-                                fullHeight
-                            }
-                        ),
-                        exit =
-                        slideOutVertically(
-                            targetOffsetY = { fullHeight: Int ->
-                                fullHeight
-                            }
-                        )
-                    ),
-                totalDuration = totalDuration,
-                currentTime = currentTime,
-                bufferedPercentage = bufferedPercentage,
-                onSeekChanged = onSeekChanged, activity
-            )
-        }
-    }
-}
-
-@Composable
-private fun TopControl(modifier: Modifier = Modifier, title: () -> String) {
-    val videoTitle = remember(title()) { title() }
-
-    Text(
-        modifier = modifier.padding(16.dp),
-        text = videoTitle,
-        style = MaterialTheme.typography.headlineLarge,
-        color = Color.Blue
-    )
-}
-
-
-@Composable
-private fun BottomControls(
-    modifier: Modifier = Modifier,
-    totalDuration: () -> Long,
-    currentTime: () -> Long,
-    bufferedPercentage: () -> Int,
-    onSeekChanged: (timeMs: Float) -> Unit,
-    activity: ComponentActivity
-) {
-
-    val duration = remember(totalDuration()) { totalDuration() }
-
-    val videoTime = remember(currentTime()) { currentTime() }
-    val view = LocalView.current
-
-    val buffer = remember(bufferedPercentage()) { bufferedPercentage() }
-    val context = LocalContext.current
-    val currentOrientation =
-        remember { mutableStateOf(context.resources.configuration.orientation) }
-
-    var showSystemUi by remember { mutableStateOf(false) }
-    val window = (view.context as Activity).window
-    val insetsController = WindowCompat.getInsetsController(window, view)
-    if (!view.isInEditMode) {
-        if (!showSystemUi) {
-            insetsController.apply {
-                hide(WindowInsetsCompat.Type.systemBars())
-                systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            }
-        } else { insetsController.apply { show(WindowInsetsCompat.Type.systemBars()) } }
-    }
-
-    Column(modifier = modifier.padding(bottom = 132.dp)) {
-        IconButton(
+        Box(
             modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .align(Alignment.End),
-            onClick = {
-                if (currentOrientation.value == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
-                    activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-                    currentOrientation.value = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-                    showSystemUi = true
+                .aspectRatio(16f / 9f)
+                .fillMaxWidth()
+                .background(Color.Black.copy(alpha = 0.6f))
+        ) {
 
+            val view = LocalView.current
+
+            val buffer = remember(bufferedPercentage()) { bufferedPercentage() }
+            val context = LocalContext.current
+            val currentOrientation =
+                remember { mutableStateOf(context.resources.configuration.orientation) }
+
+            var showSystemUi by remember { mutableStateOf(false) }
+            val window = (view.context as Activity).window
+            val insetsController = WindowCompat.getInsetsController(window, view)
+            if (!view.isInEditMode) {
+                if (!showSystemUi) {
+                    insetsController.apply {
+                        hide(WindowInsetsCompat.Type.systemBars())
+                        systemBarsBehavior =
+                            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                    }
                 } else {
-                    activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-                    currentOrientation.value = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-                    showSystemUi = false
+                    insetsController.apply { show(WindowInsetsCompat.Type.systemBars()) }
+                }
+            }
 
+
+            IconButton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomEnd),
+                onClick = {
+                    if (currentOrientation.value == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
+                        activity.requestedOrientation =
+                            ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                        currentOrientation.value = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                        showSystemUi = true
+
+                    } else {
+                        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                        currentOrientation.value = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                        showSystemUi = false
+
+
+                    }
 
                 }
-
+            ) {
+                Image(
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .align(Alignment.BottomEnd),
+                    contentScale = ContentScale.Crop,
+                    painter = painterResource(id = R.drawable.baseline_fullscreen_24),
+                    contentDescription = "Enter/Exit fullscreen"
+                )
             }
-        ) {
-            Image(
-                contentScale = ContentScale.Crop,
-                painter = painterResource(id = R.drawable.baseline_fullscreen_24),
-                contentDescription = "Enter/Exit fullscreen"
-            )
         }
-    }
-}
 
-
-fun Long.formatMinSec(): String {
-    return if (this == 0L) {
-        "..."
-    } else {
-        String.format(
-            "%02d:%02d",
-            TimeUnit.MILLISECONDS.toMinutes(this),
-            TimeUnit.MILLISECONDS.toSeconds(this) -
-                    TimeUnit.MINUTES.toSeconds(
-                        TimeUnit.MILLISECONDS.toMinutes(this)
-                    )
-        )
     }
 }
 
