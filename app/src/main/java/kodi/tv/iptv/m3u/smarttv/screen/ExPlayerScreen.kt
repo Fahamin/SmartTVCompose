@@ -20,9 +20,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,6 +46,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -50,6 +58,8 @@ import androidx.media3.ui.PlayerView
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import kodi.tv.iptv.m3u.smarttv.R
+import kodi.tv.iptv.m3u.smarttv.route.Routes
+import kodi.tv.iptv.m3u.smarttv.viewModel.DbViewModel
 
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
@@ -103,6 +113,11 @@ fun VideoPlayer(
             .fillMaxWidth()
             .aspectRatio(16f / 9f)
     }
+    val viewModel = hiltViewModel<DbViewModel>()
+
+    val searchText by viewModel.searchText.collectAsState()
+    val channelList by viewModel.persons.collectAsState()
+    val isSearching by viewModel.isSearching.collectAsState()
 
     Column {
         Box(modifier = Modifier) {
@@ -185,14 +200,57 @@ fun VideoPlayer(
                 activity = activity
             )
         }
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(5.dp))
         Row {
             AsyncImage(
+                modifier = Modifier.size(width = 30.dp, height = 30.dp),
                 model = "https://delasign.com/delasignBlack.png",
                 placeholder = painterResource(id = R.drawable.baseline_live_tv_24),
                 error = painterResource(id = R.drawable.baseline_live_tv_24),
                 contentDescription = "The delasign logo",
             )
+        }
+        Spacer(modifier = Modifier.height(5.dp))
+
+        TextField(
+            value = searchText,
+            onValueChange = viewModel::onSearchTextChange,
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = { Text(text = "Search") }
+        )
+        Spacer(modifier = Modifier.height(5.dp))
+        if (isSearching) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(8.dp)
+            ) {
+                var selectedIndex = 0
+                //  Log.e("fahamin", itemList[0].name.toString())
+                if (channelList!!.isEmpty()) {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                } else {
+                    LazyColumn {
+                        itemsIndexed(items = channelList!!) { index, item ->
+                            ListChannel(
+                                m3uModel = item, index, selectedIndex
+                            ) { i ->
+                                selectedIndex = i
+
+                                navController.navigate("${Routes.player1}?name=${channelList[i].path}?cat=news")
+                            }
+                        }
+                    }
+
+                }
+
+            }
         }
     }
 
