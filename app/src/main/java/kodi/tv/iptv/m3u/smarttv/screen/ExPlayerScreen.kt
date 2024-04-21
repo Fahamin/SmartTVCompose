@@ -48,6 +48,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.ui.PlayerView
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
 import kodi.tv.iptv.m3u.smarttv.R
 
 @androidx.annotation.OptIn(UnstableApi::class)
@@ -186,7 +187,12 @@ fun VideoPlayer(
         }
         Spacer(modifier = Modifier.height(10.dp))
         Row {
-
+            AsyncImage(
+                model = "https://delasign.com/delasignBlack.png",
+                placeholder = painterResource(id = R.drawable.baseline_live_tv_24),
+                error = painterResource(id = R.drawable.baseline_live_tv_24),
+                contentDescription = "The delasign logo",
+            )
         }
     }
 

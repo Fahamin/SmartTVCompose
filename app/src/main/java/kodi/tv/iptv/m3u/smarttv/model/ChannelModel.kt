@@ -37,4 +37,14 @@ data class ChannelModel(
     var title: String = "",
 
 
-    )
+    ){
+    fun doesMatchSearchQuery(query: String): Boolean {
+        val matchingCombinations = listOf(
+            title
+        )
+
+        return matchingCombinations.any {
+            it.contains(query, ignoreCase = true)
+        }
+    }
+}
