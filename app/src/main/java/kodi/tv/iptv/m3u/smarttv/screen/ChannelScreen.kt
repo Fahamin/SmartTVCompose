@@ -97,14 +97,13 @@ fun ChannelScreen(navController: NavHostController) {
 fun ListChannel(
     m3uModel: ChannelModel, index: Int, selectedIndex: Int, onClick: (Int) -> Unit
 ) {
-    val backgroundColor = if (index == selectedIndex) MaterialTheme.colorScheme.primary
-    else MaterialTheme.colorScheme.background
+
     Card(modifier = Modifier
         .padding(8.dp, 4.dp)
         .fillMaxWidth()
         .clickable { onClick(index) }
         .height(50.dp), shape = RoundedCornerShape(8.dp)) {
-        Surface(color = backgroundColor) {
+        Surface() {
 
             Row(
                 horizontalArrangement = Arrangement.Start,

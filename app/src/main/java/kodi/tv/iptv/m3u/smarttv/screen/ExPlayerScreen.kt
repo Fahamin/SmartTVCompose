@@ -33,6 +33,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -69,14 +70,20 @@ fun VideoPlayer(
     cat: String?,
     activity: ComponentActivity
 ) {
+
+    val urlLink = remember {
+        mutableStateOf(link)
+    }
+    val scope = rememberCoroutineScope()
+
     Log.e("fahamin", cat!!)
     val context = LocalContext.current
     val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
     val hlsMediaSource =
         HlsMediaSource.Factory(dataSourceFactory)
-            .createMediaSource(MediaItem.fromUri(link.toString()))
+            .createMediaSource(MediaItem.fromUri(urlLink.value.toString()))
 
-    val exoPlayer = remember {
+    var exoPlayer = remember {
         ExoPlayer.Builder(context)
             .apply {
                 setSeekBackIncrementMs(PLAYER_SEEK_BACK_INCREMENT)
@@ -156,7 +163,6 @@ fun VideoPlayer(
                         playerView.player = exoPlayer
                         playerView.useController = false
                         playerView.keepScreenOn = true
-
 
                     }
                 }
@@ -242,8 +248,7 @@ fun VideoPlayer(
                                 m3uModel = item, index, selectedIndex
                             ) { i ->
                                 selectedIndex = i
-
-                                navController.navigate("${Routes.player1}?name=${channelList[i].path}?cat=news")
+                                  navController.navigate("${Routes.player1}?name=${channelList[i].path}?cat=news")
                             }
                         }
                     }
