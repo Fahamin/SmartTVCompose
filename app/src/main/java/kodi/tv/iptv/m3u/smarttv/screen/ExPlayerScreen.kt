@@ -248,7 +248,7 @@ fun VideoPlayer(
                                 m3uModel = item, index, selectedIndex
                             ) { i ->
                                 selectedIndex = i
-                                  navController.navigate("${Routes.player1}?name=${channelList[i].path}?cat=news")
+                                navController.navigate("${Routes.player1}?name=${channelList[i].path}?cat=news")
                             }
                         }
                     }
