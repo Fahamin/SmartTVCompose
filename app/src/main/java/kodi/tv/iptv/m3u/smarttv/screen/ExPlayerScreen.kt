@@ -168,7 +168,6 @@ fun VideoPlayer(
                 }
             )
 
-
             PlayerControls(
                 isVisible = { shouldShowControls },
                 isPlaying = { isPlaying },
@@ -261,6 +260,8 @@ fun VideoPlayer(
 
 }
 
+
+
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun PlayerControls(
@@ -317,6 +318,8 @@ private fun PlayerControls(
                 }
             }
 
+
+            
 
             IconButton(
                 modifier = Modifier

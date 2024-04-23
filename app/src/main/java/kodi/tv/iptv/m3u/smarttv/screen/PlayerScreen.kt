@@ -68,7 +68,6 @@ fun PlayerScreen(
         }
     }
 
-
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(key1 = lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
