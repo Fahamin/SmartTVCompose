@@ -11,6 +11,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,10 +22,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -42,6 +45,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.WindowCompat
@@ -59,8 +63,10 @@ import androidx.media3.ui.PlayerView
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import kodi.tv.iptv.m3u.smarttv.R
-import kodi.tv.iptv.m3u.smarttv.route.Routes
+import kodi.tv.iptv.m3u.smarttv.model.ChannelModel
 import kodi.tv.iptv.m3u.smarttv.viewModel.DbViewModel
+import kodi.tv.iptv.m3u.smarttv.viewModel.PlayerViewModel
+import kotlinx.coroutines.launch
 
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
@@ -70,18 +76,20 @@ fun VideoPlayer(
     cat: String?,
     activity: ComponentActivity
 ) {
+    val viewModel = hiltViewModel<DbViewModel>()
+    val playerViewModel = hiltViewModel<PlayerViewModel>()
 
-    val urlLink = remember {
-        mutableStateOf(link)
-    }
+    //  val urlLink by playerViewModel.selectedUrl.observeAsState(initial = link)
+    var selectedUrl by remember { mutableStateOf(link) }
     val scope = rememberCoroutineScope()
 
-    Log.e("fahamin", cat!!)
+    Log.e("fahamin", selectedUrl!!)
     val context = LocalContext.current
     val dataSourceFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
-    val hlsMediaSource =
+    var hlsMediaSource = remember {
         HlsMediaSource.Factory(dataSourceFactory)
-            .createMediaSource(MediaItem.fromUri(urlLink.value.toString()))
+            .createMediaSource(MediaItem.fromUri(selectedUrl.toString()))
+    }
 
     var exoPlayer = remember {
         ExoPlayer.Builder(context)
@@ -112,6 +120,8 @@ fun VideoPlayer(
     var playbackState by remember { mutableStateOf(exoPlayer.playbackState) }
 
     var isFullScreen by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(true) }
+    var channelPos by remember { mutableStateOf(0) }
 
     var playerModifier = if (isFullScreen) {
         Modifier.fillMaxSize()
@@ -120,15 +130,22 @@ fun VideoPlayer(
             .fillMaxWidth()
             .aspectRatio(16f / 9f)
     }
-    val viewModel = hiltViewModel<DbViewModel>()
 
     val searchText by viewModel.searchText.collectAsState()
     val channelList by viewModel.persons.collectAsState()
     val isSearching by viewModel.isSearching.collectAsState()
 
     Column {
+        TextField(
+            value = searchText,
+            onValueChange = viewModel::onSearchTextChange,
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = { Text(text = "Search") }
+        )
+
         Box(modifier = Modifier) {
             DisposableEffect(key1 = Unit) {
+
                 val listener =
                     object : Player.Listener {
                         override fun onEvents(
@@ -141,6 +158,8 @@ fun VideoPlayer(
                             bufferedPercentage = player.bufferedPercentage
                             isPlaying = player.isPlaying
                             playbackState = player.playbackState
+                            isLoading = player.isLoading
+
                         }
                     }
 
@@ -206,24 +225,10 @@ fun VideoPlayer(
             )
         }
         Spacer(modifier = Modifier.height(5.dp))
-        Row {
-            AsyncImage(
-                modifier = Modifier.size(width = 30.dp, height = 30.dp),
-                model = "https://delasign.com/delasignBlack.png",
-                placeholder = painterResource(id = R.drawable.baseline_live_tv_24),
-                error = painterResource(id = R.drawable.baseline_live_tv_24),
-                contentDescription = "The delasign logo",
-            )
-        }
+        favOption(channelList, channelPos)
+
         Spacer(modifier = Modifier.height(5.dp))
 
-        TextField(
-            value = searchText,
-            onValueChange = viewModel::onSearchTextChange,
-            modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text(text = "Search") }
-        )
-        Spacer(modifier = Modifier.height(5.dp))
         if (isSearching) {
             Box(modifier = Modifier.fillMaxSize()) {
                 CircularProgressIndicator(
@@ -241,16 +246,29 @@ fun VideoPlayer(
                 if (channelList!!.isEmpty()) {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 } else {
-                    LazyColumn {
-                        itemsIndexed(items = channelList!!) { index, item ->
-                            ListChannel(
-                                m3uModel = item, index, selectedIndex
-                            ) { i ->
-                                selectedIndex = i
-                                navController.navigate("${Routes.player1}?name=${channelList[i].path}?cat=news")
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        content = {
+
+                            itemsIndexed(items = channelList!!) { index, item ->
+                                ListChannel(
+                                    model = item, index, selectedIndex
+                                ) { i ->
+                                    selectedIndex = i
+                                    channelPos = i
+                                    scope.launch {
+                                        selectedUrl = channelList[i].path
+                                        hlsMediaSource =
+                                            HlsMediaSource.Factory(dataSourceFactory)
+                                                .createMediaSource(MediaItem.fromUri(channelList[i].path))
+
+                                        playerViewModel.selectUrl(channelList[i].path)
+                                    }
+                                    // navController.navigate("${Routes.player1}?name=${channelList[i].path}?cat=news")
+                                }
                             }
-                        }
-                    }
+                        })
 
                 }
 
@@ -260,7 +278,37 @@ fun VideoPlayer(
 
 }
 
+@Composable
+fun favOption(channelList: List<ChannelModel>, pos: Int) {
+    Row(
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        AsyncImage(
+            modifier = Modifier.size(width = 80.dp, height = 80.dp),
+            model = channelList[pos].logoUrl,
+            placeholder = painterResource(id = R.drawable.baseline_live_tv_24),
+            error = painterResource(id = R.drawable.baseline_live_tv_24),
+            contentDescription = "The delasign logo",
+        )
+        Text(
+            modifier = Modifier
+                .padding(start = 5.dp)
+                .align(alignment = Alignment.CenterVertically),
+            text = channelList[pos].title,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            color = Color.Blue
+        )
+        Image(
+            painter = painterResource(id = R.drawable.baseline_favorite_24),
+            contentDescription = ""
+        )
 
+
+    }
+}
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -319,8 +367,6 @@ private fun PlayerControls(
             }
 
 
-            
-
             IconButton(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -339,7 +385,6 @@ private fun PlayerControls(
 
 
                     }
-
                 }
             ) {
                 Image(
