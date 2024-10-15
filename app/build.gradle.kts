@@ -26,7 +26,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -40,7 +40,41 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+    flavorDimensions += listOf("firebase")
+    productFlavors {
+        create("dev") {
+            dimension = "firebase"
+            applicationId = "kodi.tv.iptv.m3u.smarttv.dev"
+
+            buildConfigField("String","BANNER_ADD_ID","\"" + "ca-app-pub-3940256099942544/6300978111"+ "\"")
+            buildConfigField("String","INTERSTITIAL_ADD_ID","\"" + "ca-app-pub-3940256099942544/1033173712"+ "\"")
+            buildConfigField("String","FB_BANNER_ADD_ID","\"" + "IMG_16_9_APP_INSTALL#YOUR_PLACEMENT_ID"+ "\"")
+            buildConfigField("String","FB_INTERSTITIAL_ADD_ID","\"" + "VID_HD_16_9_46S_APP_INSTALL#YOUR_PLACEMENT_ID"+ "\"")
+            buildConfigField("String","ADMOB_NATIVE_ID","\"" + "ca-app-pub-6013605396446078/3857563619"+ "\"")
+
+
+        }
+        create("pro") {
+            dimension = "firebase"
+            applicationId = "kodi.tv.iptv.m3u.smarttv"
+
+            /*buildConfigField("String","ADMOB_NATIVE_ID","\"" + "ca-app-pub-3940256099942544/2247696110"+ "\"")
+            buildConfigField("String","BANNER_ADD_ID","\"" + "ca-app-pub-3940256099942544/6300978111"+ "\"")
+            buildConfigField("String","INTERSTITIAL_ADD_ID","\"" + "ca-app-pub-3940256099942544/1033173712"+ "\"")
+            buildConfigField("String","FB_BANNER_ADD_ID","\"" + "IMG_16_9_APP_INSTALL#YOUR_PLACEMENT_ID"+ "\"")
+            buildConfigField("String","FB_INTERSTITIAL_ADD_ID","\"" + "VID_HD_16_9_46S_APP_INSTALL#YOUR_PLACEMENT_ID"+ "\"")
+           */
+
+            buildConfigField("String","ADMOB_NATIVE_ID","\"" + "ca-app-pub-6013605396446078/3857563619"+ "\"")
+            buildConfigField("String","BANNER_ADD_ID","\"" + "ca-app-pub-6013605396446078/3573674349"+ "\"")
+            buildConfigField("String","INTERSTITIAL_ADD_ID","\"" + "ca-app-pub-6013605396446078/3756920444"+ "\"")
+            buildConfigField("String","FB_BANNER_ADD_ID","\"" + "308871724906304_321673193626157"+ "\"")
+            buildConfigField("String","FB_INTERSTITIAL_ADD_ID","\"" + "308871724906304_308873668239443"+ "\"")
+
+        }
+    }
     buildFeatures {
+        buildConfig = true
         compose = true
     }
     composeOptions {
@@ -63,6 +97,8 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material3:material3-window-size-class-android:1.3.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
@@ -86,7 +122,7 @@ dependencies {
     //lottie
     implementation( "com.airbnb.android:lottie-compose:5.2.0")
     //navigation
-    implementation("androidx.navigation:navigation-compose:2.7.7")
+    implementation("androidx.navigation:navigation-compose:2.8.2")
     //pager
     implementation ("androidx.compose.foundation:foundation:1.6.4")
     //firebase
@@ -115,4 +151,9 @@ dependencies {
     implementation ("androidx.media3:media3-exoplayer:1.3.0")
     implementation ("androidx.media3:media3-ui:1.3.0")
     implementation("androidx.media3:media3-exoplayer-hls:1.3.0")
+
+    implementation ("com.google.android.gms:play-services-ads:23.4.0")
+    implementation ("com.facebook.android:audience-network-sdk:6.16.0")
+    implementation("com.facebook.infer.annotation:infer-annotation:0.18.0")
+
 }

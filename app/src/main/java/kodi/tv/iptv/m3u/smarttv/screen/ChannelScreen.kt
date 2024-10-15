@@ -1,141 +1,104 @@
 package kodi.tv.iptv.m3u.smarttv.screen
 
-import androidx.compose.foundation.clickable
+import android.app.Activity
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
-import coil.compose.AsyncImage
-import kodi.tv.iptv.m3u.smarttv.R
-import kodi.tv.iptv.m3u.smarttv.model.ChannelModel
+import androidx.navigation.NavController
+import kodi.tv.iptv.m3u.smarttv.MainActivity
+import kodi.tv.iptv.m3u.smarttv.common_component.RegularChannelItem
 import kodi.tv.iptv.m3u.smarttv.route.Routes
+import kodi.tv.iptv.m3u.smarttv.ui.theme.dimens
+import kodi.tv.iptv.m3u.smarttv.utils.Fun.Companion.nc
+import kodi.tv.iptv.m3u.smarttv.utils.admob.LoadNativeAd
+import kodi.tv.iptv.m3u.smarttv.utils.admob.NativeAdViewSmall
 import kodi.tv.iptv.m3u.smarttv.viewModel.DbViewModel
+import kodi.tv.iptv.m3u.smarttv.viewModel.PlayerViewModel
+import kodi.tv.iptv.m3u.smarttv.viewModel.SearchChannelViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChannelScreen(navController: NavHostController) {
-
-    val viewModel = hiltViewModel<DbViewModel>()
-
-    val searchText by viewModel.searchText.collectAsState()
-    val channelList by viewModel.persons.collectAsState()
-    val isSearching by viewModel.isSearching.collectAsState()
-    // var channelList by remember { mutableStateOf(emptyList<ChannelModel>()) }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        TextField(
-            value = searchText,
-            onValueChange = viewModel::onSearchTextChange,
-            modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text(text = "Search") }
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        if (isSearching) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
-        } else {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(8.dp)
-            ) {
-                var selectedIndex = 0
-                //  Log.e("fahamin", itemList[0].name.toString())
-                if (channelList!!.isEmpty()) {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                } else {
-                    LazyColumn {
-                        itemsIndexed(items = channelList!!) { index, item ->
-                            ListChannel(
-                                model = item, index, selectedIndex
-                            ) { i ->
-                                selectedIndex = i
-
-                                navController.navigate("${Routes.player1}?name=${channelList[i].path}?cat=news")
-                            }
-                        }
-                    }
-
-                }
-
-            }
-        }
-    }
-}
-
-@Composable
-fun ListChannel(
-    model: ChannelModel, index: Int, selectedIndex: Int, onClick: (Int) -> Unit
+fun ChannelScreen(
+    viewModel: DbViewModel,
+    channelViewModel: PlayerViewModel,
+    searchChannelViewModel: SearchChannelViewModel,
+    activity: Activity = LocalContext.current as MainActivity,
+    navController: NavController
 ) {
+    val selectedIndex = remember { mutableIntStateOf(0) }
+    val context = LocalContext.current
 
-    Card(modifier = Modifier
-        .padding(8.dp, 4.dp)
-        .fillMaxWidth()
-        .clickable { onClick(index) }, shape = RoundedCornerShape(8.dp)
-    ) {
+    LaunchedEffect(key1 = Unit, block = {
+        channelViewModel.callChannelDataByCatId()
+    })
+
+    Column {
+
 
         Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.Start
         ) {
+            channelViewModel.channelData.observeAsState().value?.let {
+                //  HeaderText(viewModel.channelCategoryName.observeAsState().value)
 
-            AsyncImage(
-                modifier = Modifier
-                    .size(width = 60.dp, height = 60.dp)
-                    .align(Alignment.CenterHorizontally),
-                model = model.logoUrl.toString(),
-                placeholder = painterResource(id = R.drawable.baseline_live_tv_24),
-                error = painterResource(id = R.drawable.baseline_live_tv_24),
-                contentDescription = "The delasign logo",
-            )
-            androidx.compose.material.Text(
-                modifier = Modifier
-                    .padding(start = 5.dp)
-                    .align(alignment = Alignment.CenterHorizontally),
-                text = model.title,
-                style = MaterialTheme.typography.bodyLarge,
-                maxLines = 1,
-                fontWeight = FontWeight.Bold,
-                color = Color.Blue
-            )
-            Spacer(modifier = Modifier.height(5.dp))
+                LazyVerticalGrid(
+                    modifier = Modifier.height(((MaterialTheme.dimens.gridItemHeight * it.size) / 2).dp),
+                    columns = GridCells.Fixed(MaterialTheme.dimens.gridCellsChannel),
+                    horizontalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.stdDimen12),
+                    verticalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.stdDimen12),
+                    userScrollEnabled = false,
+                    contentPadding = PaddingValues(
+                        start = 12.dp,
+                        top = 10.dp,
+                        end = 12.dp,
+                        bottom = 16.dp
+                    )
+                ) {
+                    items(it.size + it.size / nc) { index ->
+                        if (index % (nc + 1) == nc) {
+                            // Place an ad view
+                            var nativAd = LoadNativeAd(context = context)
+                            NativeAdViewSmall(nativAd)
+                        } else {
+                            // Calculate the actual item index considering the ads
+                            val actualItemIndex = index - index / (nc + 1)
+
+                            RegularChannelItem(
+                                item = it.get(actualItemIndex),
+                                modifier = Modifier.height(MaterialTheme.dimens.channelMedium),
+                                onItemClick = { clickedItem ->
+                                    //    loadInterstitialAdd(context)
+                                    // channelViewModel.addTOFrequentChannel(clickedItem.id!!)
+                                    channelViewModel.setSelectedChannel(clickedItem)
+                                    navController.navigate(Routes.DetailScreen)
+                                },
+                            )
+                        }
+                    }
+                }
+            }
+
         }
-
-
     }
 
 }
-

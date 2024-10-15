@@ -21,7 +21,7 @@ import javax.inject.Inject
 class DbViewModel @Inject constructor(private var repository: DbRepository) : ViewModel() {
 
 
-    fun insertChannel(channelModel: ChannelModel) {
+    fun insertChannel(channelModel:List<ChannelModel> ) {
         repository.insertChannel(channelModel)
     }
 
@@ -46,7 +46,6 @@ class DbViewModel @Inject constructor(private var repository: DbRepository) : Vi
         return repository.getAllPlayList()
     }
 
-
     fun insertFav(noteModel: Player_FavModel) {
         repository.insertFav(noteModel)
     }
@@ -62,7 +61,6 @@ class DbViewModel @Inject constructor(private var repository: DbRepository) : Vi
     fun delete(noteModel: Player_FavModel) {
         repository.delete(noteModel)
     }
-
 
     private val _searchText = MutableStateFlow("")
     val searchText = _searchText.asStateFlow()

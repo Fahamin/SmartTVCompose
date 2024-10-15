@@ -32,5 +32,12 @@ fun MyBottomNavBar(
             icon = { Icon(imageVector = Icons.Filled.Place, contentDescription = "Place Icon") },
             enabled = true,
         )
+
+        BottomNavigationItem(
+            selected = true,
+            onClick = { onSelectedItem(3) },
+            icon = { Icon(imageVector = Icons.Filled.Place, contentDescription = "Place Icon") },
+            enabled = true,
+        )
     }
 }

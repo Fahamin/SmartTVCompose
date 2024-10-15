@@ -31,7 +31,7 @@ sealed class BottomBarNavigation(
     )
 
     object saveChannel : BottomBarNavigation(
-        route = Routes.saveChannel,
+        route = Routes.DetailScreen,
         title = "Favorite",
         icon = Icons.Default.Settings
     )

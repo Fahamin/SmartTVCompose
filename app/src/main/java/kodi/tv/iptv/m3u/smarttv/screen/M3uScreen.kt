@@ -35,6 +35,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.media3.common.BundleListRetriever.getList
+import androidx.media3.common.util.UnstableApi
+import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import com.google.firebase.database.DataSnapshot
@@ -47,12 +50,17 @@ import kodi.tv.iptv.m3u.smarttv.model.M3uModel
 import kodi.tv.iptv.m3u.smarttv.route.Routes
 import kodi.tv.iptv.m3u.smarttv.utils.M3UParserurl
 import kodi.tv.iptv.m3u.smarttv.viewModel.DbViewModel
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.concurrent.Executors
+
+var referenceBuild = FirebaseDatabase.getInstance().getReference("mm")
+var viewModel: DbViewModel? = null
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun M3uScreen(navController: NavHostController) {
-    val viewModel = hiltViewModel<DbViewModel>()
+fun M3uScreen(navController: NavController) {
+    viewModel = hiltViewModel<DbViewModel>()
 
     var itemList by remember { mutableStateOf(emptyList<M3uModel>()) }
 
@@ -63,7 +71,6 @@ fun M3uScreen(navController: NavHostController) {
         // Set up Firebase Realtime Database reference
         val database = FirebaseDatabase.getInstance()
         val myRef = database.getReference("mm")
-
         myRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 for (snapshot in dataSnapshot.children) {
@@ -104,24 +111,21 @@ fun M3uScreen(navController: NavHostController) {
                 .fillMaxSize()
                 .padding(pa)
         ) {
-            var selectedIndex = 0
-            //  Log.e("fahamin", itemList[0].name.toString())
+
             if (itemList.isEmpty()) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             } else {
-
 
                 val executor = Executors.newSingleThreadExecutor()
                 val handler = Handler(Looper.getMainLooper())
 
                 executor.execute(Runnable {
 
-                    for (i in 0..itemList.size-1)
-                    {
-                        var isAdd = viewModel.checkPlayList(itemList[i].link.toString())
+                    for (i in itemList.indices) {
+                        var isAdd = viewModel!!.checkPlayList(itemList[i].link.toString())
                         if (isAdd) {
 
-                        }else{
+                        } else {
                             val parse: List<ChannelModel> =
                                 M3UParserurl().parse(itemList[i].link)
                             Log.e("fahamin", parse.toString())
@@ -130,11 +134,9 @@ fun M3uScreen(navController: NavHostController) {
                             model.idPlayList = itemList[i].link.toString()
                             model.namePlayList = itemList[i].name.toString()
                             model.totalChannel = parse.size
-                            viewModel.insertPlaylist(model)
+                            viewModel!!.insertPlaylist(model)
+                            viewModel!!.insertChannel(parse)
 
-                            for (i in parse) {
-                                viewModel.insertChannel(i)
-                            }
                         }
 
                         handler.post(Runnable {
@@ -144,41 +146,207 @@ fun M3uScreen(navController: NavHostController) {
                     }
 
 
-
                 })
 
-
-              /*  LazyColumn {
-                    itemsIndexed(items = itemList) { index, item ->
-                        ListItemView(
-                            m3uModel = item, index, selectedIndex
-                        ) { i ->
-                            selectedIndex = i
-
-                            Log.e("fahamin", itemList[i].name.toString())
-                            Log.e("fahamin", itemList[i].link.toString())
-
-                            var isAdd = viewModel.checkPlayList(itemList[i].link.toString())
-                            if (isAdd) {
-                                navController.navigate(Routes.play) {
-                                    launchSingleTop
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        inclusive = true
-                                    }
-                                }
-                            } else {
-
-
-                            }
-
-                        }
-                    }
-                }*/
 
             }
 
         }
     }
+}
+
+fun parsing(link: String?, playListName: String) {
+    var executor = Executors.newSingleThreadExecutor()
+    var handler = Handler(Looper.getMainLooper())
+
+    //preExccute
+    // showProgress();
+    executor.execute(Runnable {
+        val parse: List<ChannelModel>? = M3UParserurl().parse(link)
+        Log.e("fahamin", parse.toString())
+        Log.e("fahamin", link.toString())
+
+        if (parse != null) {
+            var isAdd = viewModel!!.checkPlayList(link!!)
+            if (isAdd) {
+
+            } else {
+                val model = PlayListModel()
+                model.idPlayList = link.toString()
+                model.namePlayList = playListName
+                model.totalChannel = parse.size
+                viewModel!!.insertPlaylist(model)
+                viewModel!!.insertChannel(parse)
+               
+            }
+            handler.post(Runnable { //post execute
+
+
+            })
+        }
+
+    })
+}
+
+private fun getUkList() {
+
+    referenceBuild.child("v").addListenerForSingleValueEvent(object : ValueEventListener {
+        @androidx.annotation.OptIn(UnstableApi::class)
+        override fun onDataChange(dataSnapshot: DataSnapshot) {
+            val changedPost: M3uModel? = dataSnapshot.getValue(M3uModel::class.java)
+            Log.e("fahamin", changedPost.toString())
+
+            if (changedPost != null) {
+                parsing(changedPost.link, changedPost.name!!)
+
+            }
+        }
+
+        override fun onCancelled(databaseError: DatabaseError) {
+        }
+    })
+}
+
+private fun getGermanList() {
+    referenceBuild.child("h").addListenerForSingleValueEvent(object : ValueEventListener {
+        override fun onDataChange(dataSnapshot: DataSnapshot) {
+            val changedPost: M3uModel? = dataSnapshot.getValue(M3uModel::class.java)
+            Log.e("fahamin", changedPost.toString())
+            
+
+            if (changedPost != null) {
+                parsing(changedPost.link, changedPost.name!!)
+
+            }
+            getUkList()
+            
+        }
+
+        override fun onCancelled(databaseError: DatabaseError) {
+            
+        }
+    })
+}
+
+private fun getEngList() {
+    referenceBuild.child("d").addListenerForSingleValueEvent(object : ValueEventListener {
+        override fun onDataChange(dataSnapshot: DataSnapshot) {
+            val changedPost: M3uModel? = dataSnapshot.getValue(M3uModel::class.java)
+            Log.e("fahamin", changedPost.toString())
+
+            if (changedPost != null) {
+                parsing(changedPost.link, changedPost.name!!)
+
+            }
+            getGermanList()
+
+        }
+
+        override fun onCancelled(databaseError: DatabaseError) {
+            
+        }
+    })
+}
+
+private fun getArabList() {
+    referenceBuild.child("a").addListenerForSingleValueEvent(object : ValueEventListener {
+        override fun onDataChange(dataSnapshot: DataSnapshot) {
+            val changedPost: M3uModel? = dataSnapshot.getValue(M3uModel::class.java)
+            Log.e("fahamin", changedPost.toString())
+
+            if (changedPost != null) {
+                parsing(changedPost.link, changedPost.name!!)
+
+            }
+            getEngList()
+
+        }
+
+        override fun onCancelled(databaseError: DatabaseError) {
+            
+        }
+    })
+}
+
+private fun getBrazilList() {
+    referenceBuild.child("b").addListenerForSingleValueEvent(object : ValueEventListener {
+        override fun onDataChange(dataSnapshot: DataSnapshot) {
+            val changedPost: M3uModel? = dataSnapshot.getValue(M3uModel::class.java)
+            Log.e("fahamin", changedPost.toString())
+
+            if (changedPost != null) {
+                parsing(changedPost.link, changedPost.name!!)
+
+            }
+            getArabList()
+
+        }
+
+        override fun onCancelled(databaseError: DatabaseError) {
+            
+        }
+    })
+}
+
+private fun getNewsList() {
+    referenceBuild.child("t").addListenerForSingleValueEvent(object : ValueEventListener {
+        override fun onDataChange(dataSnapshot: DataSnapshot) {
+            val changedPost: M3uModel? = dataSnapshot.getValue(M3uModel::class.java)
+            Log.e("fahamin", changedPost.toString())
+
+            if (changedPost != null) {
+                parsing(changedPost.link, changedPost.name!!)
+
+            }
+            getBrazilList()
+
+        }
+
+        override fun onCancelled(databaseError: DatabaseError) {
+            
+        }
+    })
+}
+
+private fun getIndianList() {
+    referenceBuild.child("c").addListenerForSingleValueEvent(object : ValueEventListener {
+        override fun onDataChange(dataSnapshot: DataSnapshot) {
+            val changedPost: M3uModel? = dataSnapshot.getValue(M3uModel::class.java)
+            Log.e("fahamin", changedPost.toString())
+
+            if (changedPost != null) {
+                parsing(changedPost.link, changedPost.name!!)
+
+            }
+            getNewsList()
+
+        }
+
+        override fun onCancelled(databaseError: DatabaseError) {
+            
+        }
+    })
+}
+
+private fun getUsaList() {
+    referenceBuild.child("g").addListenerForSingleValueEvent(object : ValueEventListener {
+        override fun onDataChange(dataSnapshot: DataSnapshot) {
+            val changedPost: M3uModel? = dataSnapshot.getValue(M3uModel::class.java)
+            Log.e("fahamin", changedPost.toString())
+
+            if (changedPost != null) {
+                parsing(changedPost.link, changedPost.name!!)
+
+            }
+            getIndianList()
+
+        }
+
+        override fun onCancelled(databaseError: DatabaseError) {
+            
+        }
+    })
+
 }
 
 @Composable

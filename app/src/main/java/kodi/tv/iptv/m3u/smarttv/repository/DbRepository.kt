@@ -13,7 +13,7 @@ class DbRepository @Inject constructor(
     private val playListDao: PlayListDao,
     private val channelFavDao: ChannelFavDao
 ) {
-    fun insertChannel(noteModel: ChannelModel) = channelDao.insertChannel(noteModel)
+    fun insertChannel(noteModel:List<ChannelModel> ) = channelDao.insertChannel(noteModel)
     fun getChannelByID(id: String): MutableList<ChannelModel> = channelDao.getChannelByPlayList(id)
     fun getAllChannel() = channelDao.getAllChannel()
 

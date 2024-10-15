@@ -9,4 +9,48 @@
 
     <string name="onBoardingTitle3">Play the beat</string>
     <string name="onBoardingText3">Most beginner producers learn make \n creating by simple beats</string>
+
+
+    <string name="frequently_played">Frequently Played</string>
+    <string name="see_all">See all</string>
+    <string name="favorites">Favorites Channel</string>
+    <string name="favorites_screen_title">Favorites</string>
+    <string name="popular_channel">Popular Channel</string>
+    <string name="tv_shows">TV Shows</string>
+    <string name="app_theme">App theme</string>
+    <string name="dark_or_light">Dark or Light Mode</string>
+    <string name="share_app">Share the App</string>
+    <string name="share_app_dec">Share the app with your friends</string>
+    <string name="about_us">About Us</string>
+    <string name="about_us_desc">Social links, policy</string>
+    <string name="more_app">More Apps</string>
+    <string name="more_app_desc">Other apps from AppiFly</string>
+    <string name="rate_us">Rate Us</string>
+    <string name="subcription">Remove Ads</string>
+    <string name="removeads">Enjoy without any advertisement </string>
+
+    <string name="rate_us_desc">Rate our app on google play store</string>
+    <string name="load_network_image">load network image</string>
+    <string name="all_channel">All Channel</string>
+    <string name="search_icon_description">search icon</string>
+    <string name="search_place_holder">Search your channel here</string>
+    <string name="text_finish">Finish</string>
+
+
+    <string name="admob_insta_id">ca-app-pub-6013605396446078/3756920444</string>
+    <string name="admob_app_id">ca-app-pub-6013605396446078~4257551694</string>
+    <string name="admob_banner_id">ca-app-pub-6013605396446078/3573674349</string>
+    <string name="admob_native_id">ca-app-pub-6013605396446078/3857563619</string>
+
+    <!--//testadmob
+    <string name="admob_insta_id">ca-app-pub-3940256099942544/1033173712</string>
+    <string name="admob_app_id">ca-app-pub-3940256099942544~3347511713</string>
+    <string name="admob_native_id">ca-app-pub-3940256099942544/2247696110</string>
+    <string name="admob_banner_id">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="admob_reward_id">ca-app-pub-3940256099942544/5224354917</string>
+-->
+
+    <string name="facebook_app_id">308871724906304</string>
+    <string name="fb_insta_id">308871724906304_308873668239443</string>
+    <string name="fb_banner_id">308871724906304_321673193626157</string>
 </resources>

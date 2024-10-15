@@ -34,7 +34,37 @@
           ]
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:95955125438:android:77d8e796516bf11508caef",
+        "android_client_info": {
+          "package_name": "kodi.tv.iptv.m3u.smarttv.dev"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "95955125438-o0867t5128o9nnhobvtv081crkhg2c3b.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBML0FhcJZRQwUePnbSuVYAh5rHQN9w9ZU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "95955125438-o0867t5128o9nnhobvtv081crkhg2c3b.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
     }
+
   ],
   "configuration_version": "1"
 }

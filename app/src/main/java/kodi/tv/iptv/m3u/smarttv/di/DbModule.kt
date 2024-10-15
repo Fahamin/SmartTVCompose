@@ -2,6 +2,7 @@ package kodi.tv.iptv.m3u.smarttv.di
 
 import android.content.Context
 import androidx.room.Room
+import com.google.firebase.database.FirebaseDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -17,7 +18,7 @@ class DbModule {
     @Provides
     @Singleton
     fun provideDB(@ApplicationContext context: Context) = Room.databaseBuilder(
-        context, KodiDatabase::class.java, "kst232"
+        context, KodiDatabase::class.java, "kst2e32"
     ).allowMainThreadQueries()
         .fallbackToDestructiveMigration()
         .build()
@@ -34,9 +35,10 @@ class DbModule {
     @Singleton
     fun providefavChannelDao(db: KodiDatabase) = db.channelFavDao()
 
-    /*
-        @Provides
-        fun provideEntity() = NoteModel()
-    */
+    @Provides
+    @Singleton
+    fun provideFirebaseDatabase(): FirebaseDatabase {
+        return FirebaseDatabase.getInstance()
+    }
 
 }
