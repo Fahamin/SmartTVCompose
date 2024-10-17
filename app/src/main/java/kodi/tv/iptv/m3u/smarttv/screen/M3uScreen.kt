@@ -50,6 +50,10 @@ import kodi.tv.iptv.m3u.smarttv.model.M3uModel
 import kodi.tv.iptv.m3u.smarttv.route.Routes
 import kodi.tv.iptv.m3u.smarttv.utils.M3UParserurl
 import kodi.tv.iptv.m3u.smarttv.viewModel.DbViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.concurrent.Executors
@@ -62,131 +66,14 @@ var viewModel: DbViewModel? = null
 fun M3uScreen(navController: NavController) {
     viewModel = hiltViewModel<DbViewModel>()
 
-    var itemList by remember { mutableStateOf(emptyList<M3uModel>()) }
-
     LaunchedEffect(Unit) {
-
-        var list: MutableList<M3uModel> = ArrayList()
-
-        // Set up Firebase Realtime Database reference
-        val database = FirebaseDatabase.getInstance()
-        val myRef = database.getReference("mm")
-        myRef.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                for (snapshot in dataSnapshot.children) {
-                    val item = snapshot.getValue(M3uModel::class.java)
-                    item?.let {
-                        list.add(it)
-                    }
-                }
-                itemList = list
-
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                // Handle error
-                Log.e("fahamin", error.toString())
-
-            }
-        })
+        getUsaList()
     }
 
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        "M3U URL",
-                        maxLines = 1,
-                        color = Color.Blue,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                },
-            )
-        },
 
-        ) { pa ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(pa)
-        ) {
-
-            if (itemList.isEmpty()) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            } else {
-
-                val executor = Executors.newSingleThreadExecutor()
-                val handler = Handler(Looper.getMainLooper())
-
-                executor.execute(Runnable {
-
-                    for (i in itemList.indices) {
-                        var isAdd = viewModel!!.checkPlayList(itemList[i].link.toString())
-                        if (isAdd) {
-
-                        } else {
-                            val parse: List<ChannelModel> =
-                                M3UParserurl().parse(itemList[i].link)
-                            Log.e("fahamin", parse.toString())
-
-                            val model = PlayListModel()
-                            model.idPlayList = itemList[i].link.toString()
-                            model.namePlayList = itemList[i].name.toString()
-                            model.totalChannel = parse.size
-                            viewModel!!.insertPlaylist(model)
-                            viewModel!!.insertChannel(parse)
-
-                        }
-
-                        handler.post(Runnable {
-
-
-                        })
-                    }
-
-
-                })
-
-
-            }
-
-        }
-    }
 }
 
-fun parsing(link: String?, playListName: String) {
-    var executor = Executors.newSingleThreadExecutor()
-    var handler = Handler(Looper.getMainLooper())
 
-    //preExccute
-    // showProgress();
-    executor.execute(Runnable {
-        val parse: List<ChannelModel>? = M3UParserurl().parse(link)
-        Log.e("fahamin", parse.toString())
-        Log.e("fahamin", link.toString())
-
-        if (parse != null) {
-            var isAdd = viewModel!!.checkPlayList(link!!)
-            if (isAdd) {
-
-            } else {
-                val model = PlayListModel()
-                model.idPlayList = link.toString()
-                model.namePlayList = playListName
-                model.totalChannel = parse.size
-                viewModel!!.insertPlaylist(model)
-                viewModel!!.insertChannel(parse)
-               
-            }
-            handler.post(Runnable { //post execute
-
-
-            })
-        }
-
-    })
-}
 
 private fun getUkList() {
 
@@ -212,18 +99,18 @@ private fun getGermanList() {
         override fun onDataChange(dataSnapshot: DataSnapshot) {
             val changedPost: M3uModel? = dataSnapshot.getValue(M3uModel::class.java)
             Log.e("fahamin", changedPost.toString())
-            
+
 
             if (changedPost != null) {
                 parsing(changedPost.link, changedPost.name!!)
 
             }
             getUkList()
-            
+
         }
 
         override fun onCancelled(databaseError: DatabaseError) {
-            
+
         }
     })
 }
@@ -243,7 +130,7 @@ private fun getEngList() {
         }
 
         override fun onCancelled(databaseError: DatabaseError) {
-            
+
         }
     })
 }
@@ -263,7 +150,7 @@ private fun getArabList() {
         }
 
         override fun onCancelled(databaseError: DatabaseError) {
-            
+
         }
     })
 }
@@ -283,7 +170,7 @@ private fun getBrazilList() {
         }
 
         override fun onCancelled(databaseError: DatabaseError) {
-            
+
         }
     })
 }
@@ -303,7 +190,7 @@ private fun getNewsList() {
         }
 
         override fun onCancelled(databaseError: DatabaseError) {
-            
+
         }
     })
 }
@@ -323,7 +210,7 @@ private fun getIndianList() {
         }
 
         override fun onCancelled(databaseError: DatabaseError) {
-            
+
         }
     })
 }
@@ -343,7 +230,7 @@ private fun getUsaList() {
         }
 
         override fun onCancelled(databaseError: DatabaseError) {
-            
+
         }
     })
 

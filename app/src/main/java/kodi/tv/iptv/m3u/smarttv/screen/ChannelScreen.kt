@@ -50,8 +50,6 @@ fun ChannelScreen(
     })
 
     Column {
-
-
         Column(
             modifier = Modifier
                 .verticalScroll(rememberScrollState())
@@ -84,11 +82,9 @@ fun ChannelScreen(
                             val actualItemIndex = index - index / (nc + 1)
 
                             RegularChannelItem(
-                                item = it.get(actualItemIndex),
+                                item = it[actualItemIndex],
                                 modifier = Modifier.height(MaterialTheme.dimens.channelMedium),
                                 onItemClick = { clickedItem ->
-                                    //    loadInterstitialAdd(context)
-                                    // channelViewModel.addTOFrequentChannel(clickedItem.id!!)
                                     channelViewModel.setSelectedChannel(clickedItem)
                                     navController.navigate(Routes.DetailScreen)
                                 },

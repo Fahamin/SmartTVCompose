@@ -18,7 +18,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PlayerViewModel @Inject constructor(
-    dbRepository: DbRepository,
+    var dbRepository: DbRepository,
     private val channelDao: ChannelModelDao,
     @MainDispatcher private val mainDispatcher: CoroutineDispatcher = Dispatchers.Main,
 
@@ -45,7 +45,7 @@ class PlayerViewModel @Inject constructor(
     fun callChannelDataByCatId() {
         viewModelScope.launch {
             withContext(mainDispatcher) {
-                _channelData.value = channelDao.getAllChannel().map { it }
+                _channelData.value = dbRepository.getAllChannel()
             }
         }
         Log.e("data", channelData.value.toString())
